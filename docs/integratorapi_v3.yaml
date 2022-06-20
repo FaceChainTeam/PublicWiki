@@ -802,6 +802,14 @@ paths:
             format: int64
             example: 1
         - in: query
+          name: latesttime
+          description: Timestamp последнего события
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1512753478
+        - in: query
           name: limit
           description: Число записей на странице
           required: false
@@ -817,14 +825,6 @@ paths:
             type: integer
             format: int64
             example: 1
-        - in: query
-          name: event
-          description: Номер страницы
-          required: false
-          schema:
-            type: string
-            enum: ['', 'user_add','user_upd', 'user_del', 'subdivision_add', 'subdivision_upd', 'subdivision_del', 'visit_add']
-            example: visit_add
       responses:
         200:
           description: Device response!
@@ -845,6 +845,9 @@ paths:
                       latestid:
                         type: integer
                         example: 1
+                      latesttime:
+                        type: integer
+                        example: 0
                       pagination:
                         $ref: "#/components/schemas/Pagination"
         default:
@@ -1285,21 +1288,51 @@ components:
         id:
           type: integer
           example: 1
-        integration:
+        external_id:
+          type: string
+          example: "116998"
+        users_id:
           type: integer
           example: 11
+        purpose:
+          type: string
+          example: "entrance"
         event:
-          type: string
-          enum: ['', 'user_add','user_upd', 'user_del', 'subdivision_add', 'subdivision_upd', 'subdivision_del', 'visit_add']
-          example: visit_add
-        metadata:
-          type: string
-          format: json
-          example: "{}"
-        synckey:
-          type: string
-          example: dsah690f6h06fg9j6f6j896sf6098f6hs6hasfgjh
+          $ref: "#/components/schemas/EventData"
+        Last:
+          type: boolean
+          example: false
         created_at:
           type: string
           example: "0001-01-01T00:00:00Z"
-
+    EventData:
+      type: object
+      properties:
+        temperature:
+          type: string
+          example: "36.6"
+        temperature_status:
+          type: string
+          example: "norm"
+        type:
+          type: string
+          example: "pass"
+        identity_types:
+          type: string
+          example: "face"
+        message:
+          type: string
+        zone:
+          type: string
+          example: "zone 2"
+        zone_id:
+          type: integer
+          example: 2
+        device_name:
+          type: string
+          example: "device 1"
+        device_uid:
+          type: string
+          example: "f520a518-a61a-4814-bf81-b7e55ba44f4c"
+          
+      
