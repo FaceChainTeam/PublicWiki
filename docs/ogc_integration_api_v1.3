@@ -1,0 +1,4278 @@
+openapi: 3.0.1
+info:
+  title: API Терминала O.Vision
+  description: Данное API предназначено для взаимодействия админки с терминалом
+    через открытый протокол openapi-3.0.1
+  version: 2.0.0
+servers:
+  - url: http://localhost:8000/
+tags:
+  - name: Авторизация
+    description: Методы авторизации Терминала
+  - name: Пользователи
+    description: Методы для работы с пользователями
+  - name: Компании
+    description: Методы для работы с компаниями
+  - name: Операторы
+    description: Методы для работы с операторами терминала
+  - name: Визиты
+    description: Методы для работы с проходами
+  - name: События
+    description: Методы для работы со всеми событиями
+  - name: Устройства
+    description: Методы для работы с устройствами
+  - name: Подразделения
+    description: Методы для работы с подразделениями
+  - name: Группы доступа
+    description: Методы для работы с группами доступа
+  - name: Зоны
+    description: Методы для работы с зонами доступа
+  - name: Карты доступа
+    description: Методы для работы с картами доступа
+  - name: Заявки
+    description: Методы для работы с заявками
+  - name: Расписание
+    description: Методы для работы с расписанием
+  - name: Параметры
+    description: Методы для работы с настройками терминала
+  - name: Отчеты
+    description: Методы для работы с отчетами
+  # - name: Интеграции
+  #   description: Методы для работы с интеграциями
+  - name: Служебные
+    description: Методы для обслуживания терминала
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Авторизация
+      summary: Авторизация
+      description:
+        Получение токена по логину и паролю, результатом будет Bearer токен
+        в head.Authorize
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessToken"
+        401:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/user:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Авторизация
+      summary: Учетная запись
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/AuthUser"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /auth/refresh:
+    get:
+      tags:
+        - Авторизация
+      summary: Обновление токена авторизации
+      description: "В параметре Header Authorization передается Bearer (refresh_token) не реже 10 мин"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessToken"
+        401:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/users:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Список пользователей
+      description: Возвращает список зарегистрированных пользователей.
+      parameters:
+        - in: query
+          name: page
+          description: Номер страницы в списке пользователей
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+        - in: query
+          name: search
+          description: "Строка поиска"
+          schema:
+            type: string
+        - in: query
+          name: mode
+          description: "Режим фильтра (noerrors, errors, blocks, blacks, deleted)"
+          schema:
+            type: string
+            example: "all"
+        - in: query
+          name: typeuser
+          description: "Тип пользователя (guest, employee)"
+          schema:
+            type: string
+            example: "all"
+        - in: query
+          name: subdivision
+          description: "Список ID групп доступа через запятую (1,2,3)"
+          schema:
+            type: string
+            example: "1,2,3"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Users"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        500:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: Unexpected error
+          content: {}
+  /api/v1/user/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Добавить пользователя
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemUserIn"
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/ItemUserOut"
+        400:
+          description: Неверная структура данных
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Получить пользователя
+      description: Метод возвращает все параметры выбранного по ID пользователя
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/ItemUserOut"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Обновить пользователя
+      description: Обновить данные пользователя по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор пользователя
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemUserIn"
+        required: false
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        400:
+          description: Ошибка структура данных
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        422:
+          description: Не найден пользователь в базе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/user/delete:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Пометить на удаление пользователей
+      description: Пометить на удаление пользователeй по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/blocked:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Блокировать пользователей
+      description: Блокировать пользователeй по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/unblocked:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Разблокировать пользователей
+      description: Разблокировать пользователeй по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/{id}/refeature:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Обновить фичу пользователя
+      description: Метод возвращает выполняет обновление биометрии пользователя
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/user/blacklisted:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Добавить в черный список
+      description: Добавить в черный список пользователeй по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user/unblacklisted:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Убрать из черного списка
+      description: Убрать из черного списка пользователей по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/restore:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Восстановить из удаленных
+      description: Восстановить удаленных пользователeй по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/clear:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Удалить пользователей
+      description: Удалить пользователей по списку  ID
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/users/trash:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Удалить помеченных пользователей
+      description: Удалить всех помеченных на удаление пользователей
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/users/all:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Удалить всех пользователей
+      description: Удалить всех пользователей
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/import:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Импорт файла *.uovb
+      description: Импорт файла резервной копии пользовалелей
+      requestBody:
+        description: Файл в формате *.uovb
+        content:
+          "multipart/form-data":
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/export:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Экспорт файла *.uovb
+      description: Экспорт файла резервной копии пользовалелей
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы в списке пользователей * 1000
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Файл uovb
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/import/photo:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Импорт файла *.png, *.jpg, *.bmp
+      description: Импорт файла резервной копии пользовалелей
+      requestBody:
+        description: Файл в формате *.uovb
+        content:
+          "image/*":
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/user/{id}/visits:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Визиты пользователя
+      description: Метод возвращает все Визиты выбранного по ID пользователя
+      parameters:
+        - name: id
+          in: path
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - in: query
+          name: month
+          description: "Год и месяц (YYYY-MM)"
+          schema:
+            type: string
+            example: "2021-01"
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/OutVisits"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/users/multi/sdv:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи
+      summary: Насначение групп доступа
+      description: Метод назначает группы доступа выбранному списку пользователей
+      requestBody:
+        description: Список ID для пометки на удаление
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: "Список ID пользователей"
+                  type: array
+                  items:
+                    type: integer
+                    example: 100
+                subdivisions:
+                  description: "Список ID групп доступа"
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+                action:
+                  description: "список акций (sdv_add, sdv_upd, sdv_del)"
+                  type: string
+                  example: "sdv_add"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/company:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Компании
+      summary: Список компаний
+      description: Возвращает список компаний.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Company"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/company/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Компании
+      summary: Добавить компанию
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyIn"
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Company"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/company/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Компании
+      summary: Получить компанию по ID
+      description: Метод возвращает все параметры выбранного по ID компании
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Company"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Компании
+      summary: Изменить данные компании
+      description: Изменить данные компании по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор компании
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyIn"
+        required: false
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Компании
+      summary: Удалить компанию
+      description: Удалить данные компании по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор компании
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/guards:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Операторы
+      summary: Список операторов
+      description: Возвращает список операторов терминала.
+      parameters:
+        - in: query
+          name: page
+          description: Номер страницы в списке операторов
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Users"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/guard/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Операторы
+      summary: Добавить оператора
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardIn"
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/UserOut"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/guard/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Операторы
+      summary: Получить оператора
+      description: Метод возвращает все параметры выбранного по ID оператора
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/UserOut"
+        400:
+          description: Ошибка структура данных
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        422:
+          description: Не найден пользователь в базе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Операторы
+      summary: Обновить оператора
+      description: Обновить данные оператора по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор оператора
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GuardIn"
+        required: false
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        400:
+          description: Ошибка структура данных
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        422:
+          description: Не найден пользователь в базе
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Операторы
+      summary: Удалить оператора
+      description: Удалить данные оператора по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор оператора
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/requests:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Заявки
+      summary: Список заявок
+      description: Возвращает список заявок.
+      parameters:
+        - in: query
+          name: owner_id
+          description: ID учетной записи администратора, оператора, менеджера из таблицы admins
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 4
+        - in: query
+          name: excluded_status
+          description: Статузы заявок
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              example: '0'
+        - in: query
+          name: department
+          description: ID подразделения
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: onlyactive
+          description: Только активные заявки
+          required: false
+          schema:
+            type: boolean
+            example: false
+        - in: query
+          name: onepass
+          description: Одноразовые/многоразовые или NULL
+          required: false
+          schema:
+            type: boolean
+            example: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Request"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+  /api/v1/visitors:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Список визитов
+      description: Возвращает список визитов из СКУД.
+      parameters:
+        - in: query
+          name: latestvisit
+          description: Таймстамп последнего визита
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 123124560
+        - in: query
+          name: temp
+          description: Ключ отображения проходов только с повышенной температурой
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VisitOut"
+                  meta:
+                    type: object
+                    properties:
+                      latestvisit:
+                        type: integer
+                        format: int64
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/alarmvisits:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Список незарегистрированных визитеров
+      description: Возвращает список незарегистрированных визитов из терминала.
+      parameters:
+        - in: query
+          name: page
+          description: номер страницы
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: temp
+          description: Ключ отображения проходов только с повышенной температурой
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/alarmvisit/{id}:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Удалить визит
+      description: Удалить данные визита по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор визита
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/visit/log:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Список журнала
+      description: Возвращает список визитов в журнале.
+      parameters:
+        - in: query
+          name: search
+          description: Строка поиска
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          description: Дата начала
+          required: false
+          schema:
+            type: string
+            example: "2021-01-01"
+        - in: query
+          name: endDate
+          description: Дата завершения
+          required: false
+          schema:
+            type: string
+            example: "2021-01-31"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VisitOut"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/visit/close:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Закрыть визит
+      description: Метод принудительного закрытия визита
+      requestBody:
+        description: Список ID визитов для закрытия
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                    example: 1
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/advanced/log:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Визиты
+      summary: Список визитеров
+      description: Метод выводит список пользователей на объекте
+      parameters:
+        - in: query
+          name: page
+          description: Номер страницы
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            example: 30
+        - in: query
+          name: search
+          description: Строка поиска
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          description: Дата начала отображения
+          required: false
+          schema:
+            type: string
+            example: "2021-01-01"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/VisitLog"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/getEvents:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - События
+      summary: Получить текущее состояние устройства (активно / неактивно)
+      description: Получить текущее состояние устройства по ID
+      parameters:
+        - in: query
+          name: latestid
+          description: Номер последнего события
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: latesttime
+          description: Timestamp последнего события
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1512753478
+        - in: query
+          name: type
+          description: Тип события (pass,before,alarm,error)
+          required: false
+          schema:
+            type: string
+            example: pass
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+        - in: query
+          name: page
+          description: Номер страницы
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        200:
+          description: Device response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Event"
+                  meta:
+                    type: object
+                    properties:
+                      latestid:
+                        type: integer
+                        example: 1
+                      latesttime:
+                        type: integer
+                        example: 0
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        default:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"    
+
+  
+  /api/v1/devices:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Список устройств
+      description: Метод выводит список биометрических устройств
+      parameters:
+        - in: query
+          name: page
+          description: Номер страницы
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            example: 30
+        - in: query
+          name: zone
+          description: ID зоны
+          required: false
+          schema:
+            type: integer
+            example: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Device"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/Pagination"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/device/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Добавить устройство
+      description: Метод добавляет биометрическое устройство
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetDevice"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Device"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/device/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Получить устройство
+      description: Метод получает данные биометрического устройства
+      parameters:
+        - name: id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Device"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Изменить устройство
+      description: Метод изменяет данные биометрического устройства
+      parameters:
+        - name: id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetDevice"
+        required: true
+
+      responses:
+        200:
+          description: User response!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Удалить устройство
+      description: Метод добавляет биометрическое устройство
+      parameters:
+        - name: id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/device/scan:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Сканировать устройства
+      description: Метод сканирует биометрические устройства в текущей подсети
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      type: string
+                      example: "192.168.1.100"
+  /api/v1/device/{id}/sync:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Синхронизировать устройство
+      description: Метод запускает синхронизацию биометрического устройства
+      parameters:
+        - name: id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timestamp:
+                  type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/device/{id}/status:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Устройства
+      summary: Статус устройства
+      description: Метод получает статус биометрического устройства
+      parameters:
+        - name: id
+          in: path
+          description: ID устройства
+          required: true
+          schema:
+            type: integer
+            format: int64,
+      responses:
+        200:
+          description: Получает ответ от устройства /get_settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  # Подразделения
+  /api/v1/departments:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Список подразделений
+      description: Возвращает список подразделений.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Department"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/departments/tree:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Дерево групп доступа
+      description: Возвращает группы доступа в виде дерева.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TreeSubdivision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/department/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Добавить группу доступа
+      description: Метод добавляет группу доступа.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentIn"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Department"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/department/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Получить подразделение
+      description: Метод получает подразделение.
+      parameters:
+        - name: id
+          in: path
+          description: ID подразделения
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Department"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Изменить подразделение
+      description: Метод изменяет данные подразделения.
+      parameters:
+        - name: id
+          in: path
+          description: ID группы
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentIn"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Подразделения
+      summary: Удалить подразделение
+      description: Метод удаляет подразделение.
+      parameters:
+        - name: id
+          in: path
+          description: ID группы
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+
+
+  # Группы доступа
+  /api/v1/subdivisions:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Список групп доступа
+      description: Возвращает список групп доступа.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SubdivisionItem"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/subdivisions/tree:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Дерево групп доступа
+      description: Возвращает группы доступа в виде дерева.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TreeSubdivision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/subdivision/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Добавить группу доступа
+      description: Метод добавляет группу доступа.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubdivisionAdd"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/SubdivisionItem"
+        default:
+          description: "unexpected error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/subdivision/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Получить группу доступа
+      description: Метод получает группу доступа.
+      parameters:
+        - name: id
+          in: path
+          description: ID группы
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/SubdivisionItem"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Изменить группу доступа
+      description: Метод изменяет данные группы доступа.
+      parameters:
+        - name: id
+          in: path
+          description: ID группы
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubdivisionAdd"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Удалить группу доступа
+      description: Метод удаляет группу доступа.
+      parameters:
+        - name: id
+          in: path
+          description: ID группы
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/subdivisions/all:
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Группы доступа
+      summary: Удалуние групп доступа
+      description: Метод удаляет всех групп доступа.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        
+  # Зоны доступа
+  /api/v1/zones:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Зоны
+      summary: Список зон доступа
+      description: Возвращает список зон доступа.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Zone"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/zone/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Зоны
+      summary: Добавить зону доступа
+      description: Метод добавляет новую зону доступа.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZoneIn"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Zone"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/zone/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Зоны
+      summary: Получить зону доступа
+      description: Метод получает зону доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID зоны
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Zone"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Зоны
+      summary: Изменить зону доступа
+      description: Метод изменяет данные в выбранной зоне доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID зоны
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZoneIn"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Зоны
+      summary: Удалить зону доступа
+      description: Метод удаляет зону доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID зоны
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  # Карты доступа
+  /api/v1/cards/{uid}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Карты доступа
+      summary: Получить список карт доступа пользователя
+      description: Метод получает список карт доступа пользователя по UID (ID пользователя).
+      parameters:
+        - name: uid
+          in: path
+          description: ID пользователя
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Card"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/card/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Карты доступа
+      summary: Добавить карту
+      description: Метод Создает новую карту доступа.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessCards"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Card"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /card/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Карты доступа
+      summary: Получить карту доступа
+      description: Метод получает карту доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/Card"
+
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Карты доступа
+      summary: Изменить карту доступа
+      description: Метод изменяет данные в выбранной карты доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Card"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Карты доступа
+      summary: Удалить карту доступа
+      description: Метод удаляет карту доступа по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID карты
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  # Расписания
+  /api/v1/schedules:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Расписание
+      summary: Список расписаний
+      description: Возвращает список расписаний.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ScheduleOut"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/schedule/add:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Расписание
+      summary: Добавить расписаний
+      description: Метод добавляет новое расписаний.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Schedule"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/ScheduleOut"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/schedule/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Расписание
+      summary: Получить расписаний
+      description: Метод получает расписаний по ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID расписания
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    $ref: "#/components/schemas/ScheduleOut"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Расписание
+      summary: Изменить расписаний
+      description: Метод изменяет расписание.
+      parameters:
+        - name: id
+          in: path
+          description: ID расписания
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Schedule"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - Расписание
+      summary: Удалить расписаний
+      description: Метод удаляет расписание.
+      parameters:
+        - name: id
+          in: path
+          description: ID расписания
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/settings:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Параметры
+      summary: Список параметров
+      description: Метод возвращает список параметров
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        key:
+                          type: string
+                          example: "SERVER_URL"
+                        value:
+                          type: string
+                          example: "http://192.168.1.100:8000"
+                  meta:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                        example: 1.0.100
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Параметры
+      summary: Установить параметр
+      description: Метод устанавливает параметры настроек
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    example: "SERVER_URL"
+                  value:
+                    type: string
+                    example: "http://192.168.1.100:8000"
+
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/setting/{key}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Параметры
+      summary: Параметр по ключу
+      description: Метод возвращает параметр по ключу
+      parameters:
+        - name: key
+          in: path
+          description: Ключ параметра
+          required: true
+          schema:
+            type: string
+            example: SERVER_URL
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: object
+                    properties:
+                      value:
+                        type: string
+                        example: "http://192.168.1.100:8000"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/setting/getUrl:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Параметры
+      summary: URL терминала
+      description: Метод возвращает URL терминала
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        example: "http://192.168.1.100:8000"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/setting/default:
+    get:
+      tags:
+        - Параметры
+      summary: Стартовые параметры
+      description: Метод возвращает язык и единицы измерения температуры
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: object
+                    properties:
+                      lang:
+                        type: string
+                        example: "ru"
+                      show:
+                        description: "Отображать переключатель языков"
+                        type: boolean
+                      temp_meas:
+                        description: "Символ отображения температуры"
+                        type: string
+                      temperature_range:
+                        description: "Диаппазон температур"
+                        type: string
+                        example: "34,37.2"
+                      temperature_enabled:
+                        description: "Использовать температуру"
+                        type: boolean
+                      temperature_rise:
+                        description: "Скрывать температуру - только сообщение"
+                        type: boolean
+                      antispoofing_enabled:
+                        description: "Использовать антиспуффинг"
+                        type: boolean
+                      antipassback_enabled:
+                        description: "Использовать блокировку двойного прохода"
+                        type: boolean
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/report/worktime:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Отчеты
+      summary: Отчет рабочего времени
+      description: Метод возвращает xlsx отчет рабочего времени
+      parameters:
+        - in: query
+          name: lang
+          description: Язык отчета (ru, en)
+          required: false
+          schema:
+            type: string
+            example: ru
+        - in: query
+          name: search
+          description: "Строка поиска"
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          description: "Начальная дата поиска"
+          schema:
+            type: string
+            example: "2021-01-01 00:00:00"
+        - in: query
+          name: endDate
+          description: "Конечная дата поиска (включительно)"
+          schema:
+            type: string
+            example: "2021-02-01 23:59:59"
+      responses:
+        200:
+          description: Файл xlsx
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/report/passed:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Отчеты
+      summary: Отчет по проходам
+      description: Метод возвращает xlsx отчет по проходам
+      parameters:
+        - in: query
+          name: lang
+          description: Язык отчета (ru, en)
+          required: false
+          schema:
+            type: string
+            example: ru
+        - in: query
+          name: search
+          description: "Строка поиска"
+          schema:
+            type: string
+        - in: query
+          name: startDate
+          description: "Начальная дата поиска"
+          schema:
+            type: string
+            example: "2021-01-01 00:00:00"
+        - in: query
+          name: endDate
+          description: "Конечная дата поиска (включительно)"
+          schema:
+            type: string
+            example: "2021-02-01 23:59:00"
+        - in: query
+          name: istemp
+          description: "Флаг-фильтр - выводить только с повышенной температурой"
+          schema:
+            type: boolean
+
+      responses:
+        200:
+          description: Файл xlsx
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/report/occup:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Отчеты
+      summary: Отчет по посетителям на объекте
+      description: Метод возвращает xlsx отчет по посетителям на объекте
+      parameters:
+        - in: query
+          name: lang
+          description: Язык отчета (ru, en)
+          required: false
+          schema:
+            type: string
+            example: ru
+      responses:
+        200:
+          description: Файл xlsx
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/report/nousers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Отчеты
+      summary: Отчет по посетителям без регистрации
+      description: Метод возвращает xlsx отчет по посетителям без регистрации
+      parameters:
+        - in: query
+          name: lang
+          description: Язык отчета (ru, en)
+          required: false
+          schema:
+            type: string
+            example: ru
+        - in: query
+          name: page
+          description: Номер страницы в списке пользователей
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1000
+      responses:
+        200:
+          description: Файл xlsx
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/report/usererrors:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Отчеты
+      summary: Отчет по пользователям с ошибочными биометрическими данными
+      description: Метод возвращает xlsx отчет пользователей с ошибочными биометрическими данными
+      parameters:
+        - in: query
+          name: lang
+          description: Язык отчета (ru, en)
+          required: false
+          schema:
+            type: string
+            example: ru
+        - in: query
+          name: page
+          description: Номер страницы в списке пользователей
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1000
+      responses:
+        200:
+          description: Файл xlsx
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/system/log:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Служебные
+      summary: Получить лог системы
+      description: Метод возвращает системный лог ошибок и предупреждений
+      parameters:
+        - in: query
+          name: size
+          description: Размер буфера вывода лога в символах
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: "#/components/schemas/Status"
+                  data:
+                    type: object
+                    properties:
+                      text:
+                        description: Текест лога
+                        type: string
+                        example: "текст последних ошибок и предупреждений системы"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/features/refresh:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Служебные
+      summary: Обновить фичи пользователей
+      description: Метод обновляет фичи пользователей
+      parameters:
+        - in: query
+          name: page
+          description: Номер страницы в списке фичей
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: limit
+          description: Число фичей для обновлений
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /api/v1/migration:
+    get:
+      tags:
+        - Служебные
+      summary: Миграция БД
+      description: Метод выполняет принудительную мигпацию БД
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessOK"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /readinessCheck:
+    get:
+      tags:
+        - Служебные
+      summary: Активность терминала
+      description: Метод выполняет проверку активности терминала
+      responses:
+        200:
+          description: OK
+        default:
+          description: unexpected error
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+  schemas:
+    Schedule:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "1 смена"
+        description:
+          type: string
+          example: "Описание"
+        data:
+          description: "Строка JSON со стуктурой времени доступа"
+          type: string
+          example:
+            '{ "full_access": false, "weekdays": "1111100", "date_from": "2020-12-01",
+            "date_to": "2021-01-01", "time_from": "08:00", "time_to": "18:00" }'
+    ScheduleOut:
+      allOf:
+        - $ref: "#/components/schemas/Schedule"
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_at:
+              type: string
+              example: "2020-03-17 12:45:56"
+    ZoneIn:
+      type: object
+      properties:
+        parent_id:
+          type: integer
+          example: null
+        name:
+          type: string
+          example: "Zone 1"
+        data:
+          $ref: "#/components/schemas/ZoneSetting"
+    Zone:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        parent_id:
+          type: integer
+          example: null
+        name:
+          type: string
+          example: "Zone 1"
+        data:
+          $ref: "#/components/schemas/ZoneSetting"
+        created_at:
+          type: string
+          example: "2020-03-17 12:45:56"
+        updated_at:
+          type: string
+          example: "2020-12-01 17:35:12"
+    ZoneSetting:
+      type: object
+      properties:
+        is_time_tracking:
+          type: boolean
+          example: false
+        is_entrance:
+          type: boolean
+          example: false
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Device 1"
+        zones_id:
+          description: ID Зоны доступа
+          type: integer
+          example: 1
+        ip_address:
+          type: string
+          example: "192.168.1.100"
+          description: Адрес устройства
+        purpose:
+          description: Направление прохода
+          type: string
+          example: entrance
+        sync_key:
+          type: string
+          example: "adsfhg-65gdf645g-2da43fgff1-7jkl5g9d4d4k3"
+          description: Уникальный ключ синхронизации
+        data:
+          description: дополнительные данные для настройки устройства в формате JSON строки
+          type: string
+          example: '{ "temperature_enable": "off", "recognition_range": 2, "control_mode": "card","card_type": "TM","pass_timeout": 10,"system_mode": "default", "recognition_face": "0.7", "recognition_mask": "0.7", "mask_enabled": false, "show_fullname": true,"show_themp_info": false,"show_access": false}'
+        created_at:
+          type: string
+          example: "2020-03-17 12:45:56"
+        updated_at:
+          type: string
+          example: "2020-03-17 12:45:56"
+    SetDevice:
+      type: object
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: "Device 1"
+        zones_id:
+          type: integer
+          example: 1
+        ip_address:
+          type: string
+          example: "192.168.1.100"
+        purpose:
+          type: string
+          example: entrance
+        data:
+          description: дополнительные данные для настройки устройства в формате JSON строки
+          type: string
+          example: '{ "temperature_enable": "off", "recognition_range": 2, "control_mode": "card","card_type": "TM","pass_timeout": 10,"system_mode": "default", "recognition_face": "0.7", "recognition_mask": "0.7", "mask_enabled": false, "show_fullname": true,"show_themp_info": false,"show_access": false}'
+    Request:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        guest_id:
+          type: integer
+          example: null
+        request_type:
+          type: integer
+          description: Тип заявки
+        owner_id:
+          type: integer
+          description: Владелец заявки
+          example: 1
+        owner_name:
+          type: string
+          description: Имя владельца заявки
+          example: "Administrator"
+        name:
+          type: string
+          description: Имя гостя
+          example: Иванов Иван Иванович
+        description:
+          type: string
+          description: Информация для приглашенного
+          example: Необходимо подойти на 2 этаж в офис 123
+        subdivisions:
+          description: Список групп доступа для входа
+          type: array
+          items:
+            type: integer
+            example: 1
+        identifier:
+          type: string
+          description: Код идентификатор (уникальный PIN-код)
+        department_name:
+          type: string
+          description: Название подразделения
+          example: "OVISION"
+        contacts:
+          $ref: "#/components/schemas/RequestContacts"
+        status:
+          type: integer
+          description: Статус заявки 0-новая, 1-подтвержденная, 2-зарегистрированная, 3-отмененая
+        due_from:
+          type: string
+          example: "2020-03-17 12:45:56"
+        due_to:
+          type: string
+          example: "2020-03-18 12:45:56"
+        link:
+          type: string
+          description: Ссылка на адрес лендинга закявки
+        live:
+          type: boolean
+          description: Актуальность заявки
+        created_at:
+          type: string
+          example: "2020-03-16 12:45:56"
+    RequestContacts:
+      type: object
+      properties:
+        phone:
+          type: string
+        email:
+          type: string
+        onepass:
+          type: boolean
+        purpose:
+          type: string
+        department:
+          type: integer
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        admins_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "My Company"
+        description:
+          type: string
+          example: "My Company description"
+        created_at:
+          type: string
+          example: "2020-03-17 12:45:56"
+        updated_at:
+          type: string
+          example: "2020-03-17 12:45:56"
+    CompanyIn:
+      type: object
+      properties:
+        admins_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "My Company"
+        description:
+          type: string
+          example: "My Company description"
+    Card:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        users_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          description: Наименование карты
+          example: "12341234"
+        number:
+          type: string
+          description: Номер карты (десятичном, HEX) форматах, взависимости от типа карты
+          example: "12341234"
+        type_card:
+          type: string
+          description: Тип карты
+          example: "WDEC26"
+        active:
+          type: boolean
+          description: Признак активности карты
+          example: true
+
+    AccessCards:
+      type: object
+      properties:
+        users_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          description: Наименование карты
+          example: "12341234"
+        number:
+          type: string
+          description: Номер карты (десятичном, HEX) форматах, взависимости от типа карты
+          example: "12341234"
+        type_card:
+          type: string
+          description: Тип карты
+          example: "WDEC26"
+        active:
+          type: boolean
+          description: Признак активности карты
+          example: true
+
+    AccessItem:
+      type: object
+      properties:
+        access:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScheduleTime"
+          description: Расписания доступа
+        external_id:
+          type: string
+          description: Внешний ID группы доступа
+          example: ""
+        id:
+          type: integer
+          description: ID группы доступа
+          example: 1
+    Error:
+      required:
+        - status
+        - data
+      type: object
+      properties:
+        status:
+          type: object
+          properties:
+            code:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: Error message
+        data:
+          type: object
+    SuccessOK:
+      required:
+        - status
+        - data
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/Status"
+        data:
+          type: object
+    Status:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "OK"
+    StatusErr:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 409
+        message:
+          type: string
+          example: "Error message"
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        first_name:
+          type: string
+          example: "Админ"
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        type_user:
+          type: string
+          example: "admin"
+        photo:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            example: "add"
+        zones:
+          type: array
+          items:
+            type: integer
+            example: 1
+    SuccessToken:
+      type: object
+      properties:
+        expire_time:
+          type: integer
+          example: 1648040764
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjpmYWxzZSwiZXhwIjoxOTU5MDc5ODY0LCJyZWZyZXNodXVpZCI6Ijc5Y"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........Q1CRk7YTR3_W2m6yTjnzljUhUDh8IYo-Jb1Gm7lf2Pk"
+    Users:
+      required:
+        - first_name
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        external_id:
+          type: string
+          example: ""
+        first_name:
+          type: string
+          example: Ivan
+        last_name:
+          type: string
+          example: Ivanov
+        middle_name:
+          type: string
+          example: Ivanovich
+        photo:
+          type: string
+          example: "user_tyt5yt2uy5uy5525uy6576677.jpg"
+        blacklisted:
+          type: boolean
+          description: Пользователь в черном списке
+          example: false
+        blocked:
+          type: boolean
+          description: Блокировка пользователя
+          example: false
+        type_user:
+          type: string
+          example: employee
+    # ItemUser:
+    #   type: object
+    #   properties:
+    #     blacklisted:
+    #       type: boolean
+    #       description: Пользователь в черном списке
+    #       example: false
+    #     blocked:
+    #       type: boolean
+    #       description: Блокировка пользователя
+    #       example: false
+    #     created_at:
+    #       type: string
+    #       description: Дата и время добавления записи
+    #       example: 2020-03-17 12:45:56
+    #     id:
+    #       type: integer
+    #       example: 1
+    #     photo:
+    #       type: string
+    #       description: Имя файла фото пользователя
+    #       example: user_tyt5yt2uy5uy5525uy6576677.jpg
+    #     schema:
+    #       $ref: '#/components/schemas/UserBase'
+    #     updated_at:
+    #       type: string
+    #       description: Дата и время изменения записи
+    #       example: 2020-03-17 12:45:56
+    GuardIn:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            username:
+              type: string
+              example: admin
+            password:
+              type: string
+              example: "passw123456"
+            zones:
+              type: array
+              description: Список ID зон
+              items:
+                type: integer
+                example: 1
+            type_user:
+              example: "guard"
+            roles:
+              type: array
+              description: Список ролей
+              items:
+                type: string
+                example: "useradd"
+            photo_encrypted:
+              type: string
+              description:
+                Если нет photo_url используется строка кодированная BASE64
+                содержащая код изображения
+              example: <base64>
+    ItemUserIn:
+      allOf:
+        - $ref: "#/components/schemas/UserBase"
+        - type: object
+          properties:
+            access_groups:
+              type: array
+              description: Список подключенных групп доступа (не обязательно)
+              items:
+                $ref: "#/components/schemas/AccessItem"
+            cards:
+              type: array
+              description: Список карт доступа
+              items:
+                $ref: "#/components/schemas/AccessCards"
+            data:
+              type: string
+              description: Доболнительные поля с формате JSON строки
+              example: "{}"
+            photo_encrypted:
+              type: string
+              description:
+                Если нет photo_url используется строка кодированная BASE64
+                содержащая код изображения
+              example: <base64>
+            photo_url:
+              type: string
+              description: URL фото пользователя
+              example: ""
+            departments_id:
+              type: integer
+            subdivisions:
+              type: array
+              description: Альтернативный список групп доступа (только ID)
+              items:
+                type: integer
+                example: 2
+            no_check_photo:
+              type: boolean
+              description: Отключение проверки фото
+    ItemUserOut:
+      allOf:
+        - $ref: "#/components/schemas/UserBase"
+        - type: object
+          properties:
+            data:
+              type: string
+              description: Доболнительные поля с формате JSON строки
+              example: '{ "docum": "23423423432"}'
+            deleted:
+              type: boolean
+              description: Пользователь помечан на удаление
+              example: false
+            id:
+              type: integer
+              example: 1
+            is_twin:
+              type: boolean
+              description: Ключ для определения двойников
+              example: false
+            on_object:
+              type: boolean
+              description: Имеются ли у пользователя визиты
+            photo:
+              type: string
+              description: Имя файла фото пользователя
+              example: user_tyt5yt2uy5uy5525uy6576677.jpg
+            photo_encrypted:
+              type: string
+              description:
+                Если нет photo_url используется строка кодированная BASE64
+                содержащая код изображения
+              example: <BASE64>
+            access_groups:
+              type: array
+              description: Список подключенных групп доступа
+              items:
+                $ref: "#/components/schemas/AccessItem"
+            cards:
+              type: array
+              description: Список карт пользовыателя
+              items:
+                $ref: "#/components/schemas/AccessCards"
+            created_at:
+              type: string
+              description: Дата и время добавления записи
+              example: 2020-03-17 12:45:56
+            updated_at:
+              type: string
+              description: Дата и время изменения записи
+              example: "2020-03-17 12:45:56"
+    UserOut:
+      allOf:
+        - $ref: "#/components/schemas/UserBase"
+        - type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            data:
+              type: string
+              description: Доболнительные поля с формате JSON строки
+              example: "{}"
+            deleted:
+              type: boolean
+              description: Пользователь помечан на удаление
+              example: false
+            photo:
+              type: string
+              description: Имя файла фото пользователя
+              example: user_tyt5yt2uy5uy5525uy6576677.jpg
+            created_at:
+              type: string
+              description: Дата и время добавления записи
+              example: 2020-03-17 12:45:56
+            updated_at:
+              type: string
+              description: Дата и время изменения записи
+              example: "2020-03-17 12:45:56"
+    OutVisits:
+      type: object
+      properties:
+        visits:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutAllVisit"
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutDaysVisit"
+        total:
+          type: string
+          example: "20:34"
+    OutAllVisit:
+      type: object
+      properties:
+        day:
+          type: string
+          example: "2021-01-13"
+        purpose:
+          type: string
+          example: "exit"
+        time_purpose:
+          type: string
+          example: "16:08"
+        data:
+          type: string
+          example: '{"zone": "terminal", "device_name": "guard-1", "temperature": 0}'
+    OutDaysVisit:
+      type: object
+      properties:
+        day:
+          type: string
+          example: "2021-01-13"
+        first_entering:
+          type: string
+          example: "19:13"
+        last_exit:
+          type: string
+          example: "23:59"
+        work_time:
+          type: string
+          example: "04:46"
+        out_work_time:
+          type: string
+          example: "00:00"
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        users_id:
+          type: integer
+          example: 1
+        purpose:
+          type: string
+          example: exit
+        event:
+          description: дополнительные данные по событиям в формате JSON строки
+          $ref: "#/components/schemas/DataEvent"
+        created_at:
+          type: string
+          description: Дата и время изменения записи
+          example: "2020-03-17 12:45:56"
+    DataEvent:
+      type: object
+      properties:
+        temperature:
+          type: string
+          example: "0.0"
+        temperature_status:
+          type: string
+          example: "norm"
+        type:
+          type: string
+          example: pass
+          description: "тип события pass - проход, before - распознан, alarm - не распознан, error - ошибка"
+        identity_types:
+          type: string
+          description: "тип идентификации face - лицо, card - карта доступа, qr QR-код"
+          example: "face"
+        identity_value:
+          type: string
+          description: "значение идентификации (для card и qr)"
+          example: ""
+        code:
+          type: integer
+          description: "код события"
+          example: 35
+        message:
+          type: string
+          example: "user_passed"
+        zone_source:
+          type: string
+          description: "Имя зоны источник"
+          example: ""
+        zone:
+          type: string
+          description: "имя зоны локации"
+          example: "Main entrance1"
+        zone_id:
+          type: string
+          description: "ID зоны локации"
+          example: "1"
+        device_name:
+          type: string
+          example: "device 1"
+        device_uid:
+          type: string
+          example: "bc0bbc03-276b-4fd7-8d68-a495922060df"
+    VisitOut:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        photo:
+          type: string
+          example: user_tyt5yt2uy5uy5525uy6576677.jpg
+        full_name:
+          type: string
+          example: "Ivanov Ivan"
+        type_user:
+          type: string
+          example: "employee"
+        purpose:
+          type: string
+          example: exit
+        data:
+          description: дополнительные данные по событиям в формате JSON строки
+          type: string
+        udata:
+          description: поле DATA пользователя в формате JSON строки
+          type: string
+        blocked:
+          type: boolean
+        blacklisted:
+          type: boolean
+        organization:
+          type: array
+          description: Список подключенных групп доступа
+          items:
+            $ref: "#/components/schemas/AccessItem"
+        created_at:
+          type: string
+          description: Дата и время создания записи
+          example: "2020-03-17 12:45:56"
+    VisitLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        photo:
+          type: string
+          example: user_tyt5yt2uy5uy5525uy6576677.jpg
+        full_name:
+          type: string
+          example: "Ivanov Ivan"
+        type_user:
+          type: string
+          example: "employee"
+        purpose:
+          type: string
+          example: exit
+        data:
+          description: дополнительные данные по событиям в формате JSON строки
+          type: string
+        blocked:
+          type: boolean
+        blacklisted:
+          type: boolean
+        organization:
+          type: array
+          description: Список подключенных групп доступа
+          items:
+            $ref: "#/components/schemas/AccessItem"
+        created_at:
+          type: string
+          description: Дата и время создания записи
+          example: "2020-03-17 12:45:56"
+    Settings:
+      type: object
+      properties:
+        temperature_range:
+          description: "Диаапвзоны температуры"
+          type: string
+          example: "34.0:37.2"
+        temperature_enabled:
+          description: "Использовать температуру"
+          type: boolean
+        temperature_rise:
+          description: "Скрывать показания температуры"
+          type: boolean
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 100
+        total:
+          type: integer
+          example: 1
+    TreeSubdivision:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        parent_id:
+          type: integer
+          example: null
+        name:
+          type: string
+          example: "Subdivision"
+        children:
+          type: array
+          items:
+            type: object
+    ScheduleTime:
+      type: object
+      properties:
+        full_access:
+          type: boolean
+        weekdays:
+          type: string
+          example: "1111100"
+        date_from:
+          type: string
+          example: "2021-01-01"
+        date_to:
+          type: string
+          example: "2022-01-01"
+        time_from:
+          type: string
+          example: "08:00"
+        time_to:
+          type: string
+          example: "18:00"
+    DepartmentIn:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: ""
+        name:
+          type: string
+          example: "Department"
+        parent_id:
+          type: integer
+          example: null
+        company_id:
+          type: integer
+          example: 1
+        schedules_id:
+          type: integer
+          example: null
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        external_id:
+          type: string
+          example: ""
+        name:
+          type: string
+          example: "Department"
+        parent_id:
+          type: integer
+          example: null
+        company_id:
+          type: integer
+          example: 1
+        schedules_id:
+          type: integer
+          example: null
+        created_at:
+          type: string
+          example: "2020-12-01 17:35:12"
+        updated_at:
+          type: string
+          example: "2020-12-01 17:35:12"
+
+    SubdivisionAdd:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: ""
+        name:
+          type: string
+          example: "Subdivision"
+        parent_id:
+          type: integer
+          example: null
+        company_id:
+          type: integer
+          example: 1
+        access:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScheduleTime"
+        zones_id:
+          type: array
+          items:
+            type: integer
+            example: 1
+        is_guest:
+          type: boolean
+    SubdivisionItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        external_id:
+          type: string
+          example: ""
+        company_id:
+          type: integer
+          example: null
+        name:
+          type: string
+          example: "Subdivision"
+        parent_id:
+          description: "Значение по умолчанию NULL (не изменять), без родительской группы -1, или ID родительской группы" 
+          type: integer
+          example: null
+        access:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScheduleTime"
+        zones_id:
+          type: array
+          items:
+            type: integer
+            example: 1
+        created_at:
+          type: string
+          example: "2020-12-01 17:35:12"
+        updated_at:
+          type: string
+          example: "2020-12-01 17:35:12"
+    Success:
+      required:
+        - message
+        - success
+      type: object
+      properties:
+        message:
+          type: string
+          example: ""
+        success:
+          type: boolean
+          example: true
+    User:
+      required:
+        - first_name
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: Имя
+          example: Ivan
+        last_name:
+          type: string
+          description: Фамилия
+          example: Ivanov
+        middle_name:
+          type: string
+          description: Второе имя (отчество)
+          example: Ivanovich
+        phone:
+          type: string
+          description: Номер сотового телефона
+          example: "+79223410000"
+        type_user:
+          type: string
+          description: Тип пользователя (admin, guard, employee, guest)
+          example: employee
+
+    UserBase:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            blacklisted:
+              type: boolean
+              description: Пользователь в черном списке
+              example: false
+            blocked:
+              type: boolean
+              description: Блокировка пользователя
+              example: false
+            external_id:
+              type: string
+              description: ID записи интегрируемого сервиса (Облако, СКУД)
+              example: ""
