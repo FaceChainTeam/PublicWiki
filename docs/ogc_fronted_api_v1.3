@@ -1233,7 +1233,7 @@ paths:
     get:
       security:
         - bearerAuth: []
-      tags:
+      ta
         - Визиты
       summary: Список визитов
       description: Возвращает список визитов из СКУД.
@@ -1298,12 +1298,48 @@ paths:
             format: int64
             example: 1
         - in: query
+          name: limit
+          description: число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+        - in: query
           name: temp
           description: Ключ отображения проходов только с повышенной температурой
           required: false
           schema:
             type: boolean
             example: true
+        - in: query
+          name: startDate
+          description: Начальная дата
+          required: false
+          schema:
+            type: string
+            example: "2022-05-31T21:00:00.000Z"
+        - in: query
+          name: endDate
+          description: Конечная дата
+          required: false
+          schema:
+            type: string
+            example: "2022-07-30T21:00:00.000Z"
+        - in: query
+          name: type[]
+          description: Массив событий (pass,before,alarm,error)
+          required: false
+          schema:
+            type: string
+            example: "pass"
+        - in: query
+          name: identityTypes[]
+          description: Массив типов идентификации (face,card,qr)
+          required: false
+          schema:
+            type: string
+            example: "face"
       responses:
         200:
           description: OK
@@ -4276,3 +4312,4 @@ components:
               type: string
               description: ID записи интегрируемого сервиса (Облако, СКУД)
               example: ""
+              
