@@ -1453,8 +1453,6 @@ components:
               type: string
               description: Дата и время удаления записи
               example: '2020-03-17 12:45:56'
-            '':
-              type: string
     Pagination:
       type: object
       properties:
