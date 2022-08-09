@@ -1,59 +1,91 @@
 openapi: 3.0.0
 info:
   title: Открытое API Ovision
-  description:
-    Данное API предназначено для подключения СКУД систем к терминалу устройств
-    O.Gate через открытый протокол openapi-3.0.0
+  description: Данное API предназначено для подключения СКУД систем к терминалу устройств O.Gate через открытый протокол openapi-3.0.0
   version: 1.0.0
+  contact:
+    name: OVISION Ltd
+    url: 'https://ovision.ru'
+    email: info@ovision.ru
 servers:
-  - url: http://localhost/
+  - url: 'http://localhost:8000'
+    description: OVISION GATE Control's user interface
 tags:
   - name: Управление пользователями
     description: Методы для работы с пользователями
-  - name: Управление группами доступа 
+  - name: Управление группами доступа
     description: Методы для работы с группами доступа
   - name: Управление устройствами
     description: Методы для работы с устройствами
   - name: Получение событий
     description: Методы для получения событий терминала
+  - name: Управление подразделениями
+    description: Методы для работы с подразделениями
 paths:
   /api/subdivision/add:
     post:
-      security:
-        - bearerAuth: []
+      description: 'Добавление уровня доступа, который привязан к зонам и времени'
       tags:
         - Управление группами доступа
       summary: Добавление группы доступа
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/SubdivisionItem"
+              $ref: '#/components/schemas/SubdivisionItem'
+            examples:
+              example-1:
+                value:
+                  created_at: '2020-12-01'
+                  external_id: string
+                  id: 1
+                  name: string
+                  parent_id: 0
+                  schedules_id: 1
+                  zones_id:
+                    - 1
         required: false
+        description: ''
       responses:
-        200:
-          description: Group list response!
+        '200':
+          description: Access group list
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionItem"
+                      $ref: '#/components/schemas/SubdivisionItem'
+              examples:
+                example-1:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data:
+                      - created_at: '2020-12-01'
+                        external_id: string
+                        id: 1
+                        name: string
+                        parent_id: 0
+                        schedules_id: 1
+                        zones_id:
+                          - 1
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/subdivision/ext/{external_id}:
+                $ref: '#/components/schemas/Error'
+      operationId: acl_add
+  '/api/subdivision/ext/{external_id}':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление группами доступа
       summary: Получить группу по external_id
@@ -66,7 +98,7 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: Ответ сервера
           content:
             application/json:
@@ -74,20 +106,22 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionItem"
+                      $ref: '#/components/schemas/SubdivisionItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: acl_ext_get
     put:
-      security:
-        - bearerAuth: []
+      operationId: acl_ext_put
       tags:
         - Управление группами доступа
       summary: Обновить группу доступа по external_id
@@ -101,29 +135,30 @@ paths:
             type: integer
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/SubdivisionItem"
+              $ref: '#/components/schemas/SubdivisionItem'
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
-      security:
-        - bearerAuth: []
+      description: Удаление группы доступа по external_id
+      operationId: acl_ext_del
       tags:
         - Управление группами доступа
-      summary: Удалить группу по external_id
       parameters:
         - name: external_id
           in: path
@@ -132,22 +167,22 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/subdivision/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/subdivision/{id}':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление группами доступа
       summary: Получить группу по ID
@@ -160,7 +195,7 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: Ответ сервера
           content:
             application/json:
@@ -168,20 +203,22 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionItem"
+                      $ref: '#/components/schemas/SubdivisionItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: acl_get
     put:
-      security:
-        - bearerAuth: []
+      operationId: acl_put
       tags:
         - Управление группами доступа
       summary: Обновить группу доступа
@@ -195,24 +232,28 @@ paths:
             type: integer
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/SubdivisionItem"
+              $ref: '#/components/schemas/SubdivisionItem'
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      description: Удаление уровня доступа по id
+      operationId: acl_del
       tags:
         - Управление группами доступа
       summary: Удалить группу по id
@@ -224,28 +265,28 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/subdivisions:
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление группами доступа
       summary: Список групп доступа
       description: Метод возвращает список групп доступа
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -253,27 +294,28 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionItem"
+                      $ref: '#/components/schemas/SubdivisionItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: acl_list
   /api/subdivisions/ids:
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление группами доступа
       summary: Получить список ID групп
       description: Получить список внутренних и внешних ID групп доступа
       responses:
-        200:
+        '200':
           description: Group list response!
           content:
             application/json:
@@ -281,32 +323,264 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionIds"
+                      $ref: '#/components/schemas/SubdivisionIds'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/users:
-    get:
-      security:
-        - bearerAuth: []
+                $ref: '#/components/schemas/Error'
+      operationId: acl_ids_list
+  /api/department/add:
+    post:
+      description: Добавление департмента
       tags:
-        - Управление пользователями
-      summary: Список пользователей
-      description: Возвращает список зарегистрированных пользователей.
+        - Управление подразделениями
+      summary: Добавление подразделения
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/DepartmentItem'
+        required: false
       responses:
-        200:
+        '200':
+          description: Group list response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DepartmentItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dep_add
+  '/api/department/{id}':
+    get:
+      tags:
+        - Управление подразделениями
+      summary: Получить подразделение по ID
+      description: Метод запрашивает подразделение по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор подразделения
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ответ сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DepartmentItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dep_get
+    put:
+      operationId: dep_put
+      tags:
+        - Управление подразделениями
+      summary: Обновить подразделение
+      description: Обновить данные подразделения по ID
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор подразделения
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/DepartmentItem'
+        required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      description: Удаление департамента по id
+      operationId: dep_del
+      tags:
+        - Управление подразделениями
+      summary: Удалить подразделение по id
+      parameters:
+        - name: id
+          in: path
+          description: идентификатор подразделение
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/api/department/ext/{external_id}':
+    get:
+      tags:
+        - Управление подразделениями
+      summary: Получить подразделение по external_id
+      description: Метод запрашивает подразделение по external_ID
+      parameters:
+        - name: external_id
+          in: path
+          description: идентификатор подразделения
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ответ сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DepartmentExtItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dep_ext_get
+    put:
+      operationId: dep_ext_put
+      tags:
+        - Управление подразделениями
+      summary: Обновить подразделение по external_id
+      description: Обновить данные подразделения по external_ID
+      parameters:
+        - name: external_id
+          in: path
+          description: идентификатор подразделения
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/DepartmentExtItem'
+        required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      description: Удаление департмента по external_id
+      operationId: dep_ext_del
+      tags:
+        - Управление подразделениями
+      summary: Удалить подразделение по external_id
+      parameters:
+        - name: external_id
+          in: path
+          description: внешний идентификатор подразделения
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/departments:
+    get:
+      tags:
+        - Управление подразделениями
+      summary: Список подразделений
+      description: Метод возвращает список подразделений
+      responses:
+        '200':
           description: OK
           content:
             application/json:
@@ -314,41 +588,113 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Users"
-                  meta:
-                    type: object
-                    properties:
-                      pagination:
-                        $ref: "#/components/schemas/Pagination"
-        500:
+                      $ref: '#/components/schemas/DepartmentExtItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: dep_list
+  /api/departments/ids:
+    get:
+      tags:
+        - Управление подразделениями
+      summary: Получить список ID подразделений
+      description: Получить список внутренних и внешних ID подразделений
+      responses:
+        '200':
+          description: Group list response!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DepartmentIds'
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          description: Unexpected error
-          content: {}
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dep_ids_list
+  /api/users:
+    get:
+      tags:
+        - Управление пользователями
+      summary: Список пользователей
+      description: Возвращает список зарегистрированных пользователей.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Users'
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: users_list
+      parameters:
+        - schema:
+            type: integer
+          in: query
+          name: limit
+          description: records on page
+        - schema:
+            type: integer
+          in: query
+          name: page
+          description: page number
   /api/user/add:
     post:
-      security:
-        - bearerAuth: []
       tags:
         - Управление пользователями
       summary: Добавление пользователя
       description: Добавление нового пользователя
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/ItemUserIn"
+              $ref: '#/components/schemas/ItemUserIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -356,37 +702,36 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ItemUserOut"
-        400:
+                    $ref: '#/components/schemas/ItemUserOut'
+        '400':
           description: Ошибка структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/user/ext/{external_id}:
+                $ref: '#/components/schemas/Error'
+      operationId: user_add
+  '/api/user/ext/{external_id}':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление пользователями
       summary: Получить пользователя по external_id
-      description:
-        Метод возвращает все параметры выбранного по внешниму external_id
-        пользователя
+      description: Метод возвращает все параметры выбранного по внешниму external_id пользователя
       parameters:
         - name: external_id
           in: path
@@ -395,7 +740,7 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -403,18 +748,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ItemUserOut"
+                    $ref: '#/components/schemas/ItemUserOut'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: user_ext_get
     put:
-      security:
-        - bearerAuth: []
+      operationId: user_ext_put
       tags:
         - Управление пользователями
       summary: Обновить пользователя по external_id
@@ -428,38 +775,40 @@ paths:
             type: string
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/ItemUserIn"
+              $ref: '#/components/schemas/ItemUserIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
-        400:
+                $ref: '#/components/schemas/Success'
+        '400':
           description: Неверная структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
-      security:
-        - bearerAuth: []
+      description: Удаление пользователя по external
+      operationId: user_ext_del
       tags:
         - Управление пользователями
       summary: Удалить пользователя по external_id
@@ -471,23 +820,22 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
-  /api/user/ext/{external_id}/check:
+                $ref: '#/components/schemas/Error'
+  '/api/user/ext/{external_id}/check':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление пользователями
       summary: Проверить пользователя
@@ -500,22 +848,23 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: Check response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/user/{id}:
+                $ref: '#/components/schemas/Error'
+      operationId: user_ext_check
+  '/api/user/{id}':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление пользователями
       summary: Получить пользователя
@@ -527,9 +876,9 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -537,18 +886,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ItemUserOut"
+                    $ref: '#/components/schemas/ItemUserOut'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: user_get
     put:
-      security:
-        - bearerAuth: []
+      operationId: user_put
       tags:
         - Управление пользователями
       summary: Обновить пользователя
@@ -562,38 +913,39 @@ paths:
             type: integer
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/ItemUserIn"
+              $ref: '#/components/schemas/ItemUserIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
-        400:
+                $ref: '#/components/schemas/Success'
+        '400':
           description: Ошибка структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
-      security:
-        - bearerAuth: []
+      operationId: user_del
       tags:
         - Управление пользователями
       summary: Удалить пользователя
@@ -606,28 +958,53 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/users/ids:
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление пользователями
       summary: Получить список ID пользователей
       description: Получить список внутренних и внешних ID пользователей
+      parameters:
+        - in: query
+          name: limit
+          description: Число записей на странице
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 30
+        - in: query
+          name: page
+          description: Номер страницы
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - in: query
+          name: non_integrated
+          description: 'Только те, у кого нет ExternalID'
+          required: false
+          schema:
+            type: integer
+            format: int64
+            example: 0
       responses:
-        200:
+        '200':
           description: Group list response!
           content:
             application/json:
@@ -635,32 +1012,34 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/UsersIds"
+                      $ref: '#/components/schemas/UsersIds'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: users_ids_list
   /api/devices:
     get:
-      security:
-        - bearerAuth: []
+      operationId: devices_list
       tags:
         - Управление устройствами
       summary: Список устройств
       description: Метод возвращает список активных устройств
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -668,21 +1047,21 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Device"
+                      $ref: '#/components/schemas/Device'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/device/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/device/{id}':
     put:
-      security:
-        - bearerAuth: []
       tags:
         - Управление устройствами
       summary: Обновить устройство
@@ -696,27 +1075,28 @@ paths:
             type: integer
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-              $ref: "#/components/schemas/Device"
+              $ref: '#/components/schemas/Device'
         required: false
       responses:
-        200:
+        '200':
           description: Device response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: Ошибка
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/device/{id}/state:
+                $ref: '#/components/schemas/Error'
+      operationId: device_put
+  '/api/device/{id}/state':
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Управление устройствами
       summary: Получить текущее состояние устройства (активно / неактивно)
@@ -729,7 +1109,7 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: Device response!
           content:
             application/json:
@@ -737,18 +1117,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/State"
+                    $ref: '#/components/schemas/State'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: Ошибка
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+      operationId: device_state_get
     put:
-      security:
-        - bearerAuth: []
+      operationId: device_state_put
       tags:
         - Управление устройствами
       summary: Изменить состояние устройства (активно / неактивно)
@@ -762,32 +1144,32 @@ paths:
             type: integer
       requestBody:
         content:
-          "*/*":
+          '*/*':
             schema:
-                type: object
-                properties:
-                  status:
-                    $ref: "#/components/schemas/Status"
-                  data:
-                    $ref: "#/components/schemas/State"
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/Status'
+                data:
+                  $ref: '#/components/schemas/State'
         required: false
       responses:
-        200:
+        '200':
           description: Device response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                $ref: '#/components/schemas/Success'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
           description: Ошибка
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/getEvents:
     get:
-      security:
-        - bearerAuth: []
       tags:
         - Получение событий
       summary: Получить текущее состояние устройства (активно / неактивно)
@@ -826,7 +1208,7 @@ paths:
             format: int64
             example: 1
       responses:
-        200:
+        '200':
           description: Device response!
           content:
             application/json:
@@ -834,11 +1216,11 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SyncEvent"
+                      $ref: '#/components/schemas/SyncEvent'
                   meta:
                     type: object
                     properties:
@@ -849,19 +1231,24 @@ paths:
                         type: integer
                         example: 0
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Ошибка
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"    
+                $ref: '#/components/schemas/Error'
+      operationId: events_list
 components:
   securitySchemes:
-    bearerAuth: # arbitrary name for the security scheme
-      type: http
-      scheme: bearer
-      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+    Token:
+      type: apiKey
+      in: header
+      name: Token
+    IID:
+      name: IID
+      type: apiKey
+      in: header
   schemas:
     State:
       type: object
@@ -869,9 +1256,9 @@ components:
         state:
           type: string
           enum:
-            - on
-            - off
-          example: "on"
+            - 'on'
+            - 'off'
+          example: 'on'
     AccessCards:
       type: object
       properties:
@@ -882,20 +1269,18 @@ components:
         expire_date:
           type: string
           description: Дата завершения обслуживания
-          example: "2026-01-01"
+          example: '2026-01-01'
         id:
           type: integer
           example: 1
         name:
           type: string
           description: Наименование карты
-          example: "12341234"
+          example: '12341234'
         number:
           type: string
-          description:
-            Номер карты (десятичном, HEX) форматах, взависимости от типа
-            карты
-          example: "12341234"
+          description: 'Номер карты (десятичном, HEX) форматах, взависимости от типа карты'
+          example: '12341234'
         type_card:
           type: string
           description: Тип карты
@@ -906,13 +1291,11 @@ components:
         access:
           type: string
           description: Строка JSON - временя доступа
-          example:
-            '{ "full_access": false, "weekdays": "1111100", "date_from": "2020-12-01",
-            "date_to": "2021-01-01", "time_from": "08:00", "time_to": "18:00" }'
+          example: '{ "full_access": false, "weekdays": "1111100", "date_from": "2020-12-01", "date_to": "2021-01-01", "time_from": "08:00", "time_to": "18:00" }'
         external_id:
           type: string
           description: Внешний ID группы доступа
-          example: "1"
+          example: '1'
         id:
           type: integer
           description: ID группы доступа
@@ -934,40 +1317,6 @@ components:
               example: Error message
         data:
           type: object
-    AuthUser:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        first_name:
-          type: string
-          example: "Админ"
-        last_name:
-          type: string
-        middle_name:
-          type: string
-        type_user:
-          type: string
-          example: "admin"
-        photo:
-          type: string
-        roles:
-          type: array
-          items:
-            type: string
-            example: "add"
-        zones:
-          type: array
-          items:
-            type: integer
-            example: 1
-    SuccessToken:
-      type: object
-      properties:
-        token:
-          type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........Q1CRk7YTR3_W2m6yTjnzljUhUDh8IYo-Jb1Gm7lf2Pk"
     Users:
       required:
         - first_name
@@ -978,7 +1327,7 @@ components:
           example: 1
         external_id:
           type: string
-          example: "1"
+          example: '1'
         first_name:
           type: string
           example: Ivan
@@ -990,7 +1339,7 @@ components:
           example: Ivanovich
         photo:
           type: string
-          example: "user_tyt5yt2uy5uy5525uy6576677.jpg"
+          example: user_tyt5yt2uy5uy5525uy6576677.jpg
         blacklisted:
           type: boolean
           description: Пользователь в черном списке
@@ -1002,94 +1351,75 @@ components:
         type_user:
           type: string
           example: employee
-    ItemUser:
-      type: object
-      properties:
-        blacklisted:
-          type: boolean
-          description: Пользователь в черном списке
-          example: false
-        blocked:
-          type: boolean
-          description: Блокировка пользователя
-          example: false
-        created_at:
-          type: string
-          description: Дата и время добавления записи
-          example: "2020-03-17 12:45:56"
-        id:
-          type: integer
-          example: 1
-        photo:
-          type: string
-          description: Имя файла фото пользователя
-          example: user_tyt5yt2uy5uy5525uy6576677.jpg
-        schema:
-          $ref: "#/components/schemas/UserBase"
-        updated_at:
-          type: string
-          description: Дата и время изменения записи
-          example: "2020-03-17 12:45:56"
     ItemUserIn:
       allOf:
-        - $ref: "#/components/schemas/UserBase"
+        - $ref: '#/components/schemas/UserBase'
         - type: object
           properties:
-            access:
+            access_groups:
               type: array
               description: Список подключенных групп доступа (не обязательно)
               items:
-                $ref: "#/components/schemas/AccessItem"
+                $ref: '#/components/schemas/AccessItem'
             cards:
               type: array
               description: Список карт доступа
               items:
-                $ref: "#/components/schemas/AccessCards"
+                $ref: '#/components/schemas/AccessCards'
             data:
               type: string
               description: Доболнительные поля с формате JSON строки
-              example: "{}"
+              example: '{}'
             photo_encrypted:
               type: string
-              description:
-                Если нет photo_url используется строка кодированная BASE64
-                содержащая код изображения
+              description: Если нет photo_url используется строка кодированная BASE64 содержащая код изображения
               example: <base64>
             photo_url:
               type: string
               description: URL фото пользователя
-              example: ""
+              example: ''
             subdivisions:
               type: array
               description: Альтернативный список групп доступа (только ID)
               items:
                 type: integer
                 example: 2
+            departments_id:
+              type: array
+              description: Список ID департаментов
+              items:
+                type: integer
+            is_twin:
+              type: boolean
+              description: Ключ для определения двойников
+              example: false
+            twin_id:
+              type: integer
+            no_check_photo:
+              type: boolean
+              description: Добавлять без валидации фото
     ItemUserOut:
       allOf:
-        - $ref: "#/components/schemas/UserBase"
+        - $ref: '#/components/schemas/UserBase'
         - type: object
           properties:
-            cards:
-              type: array
-              description: Список карт пользовыателя
-              items:
-                $ref: "#/components/schemas/AccessCards"
-            created_at:
+            id:
+              type: integer
+              example: 1
+            uid:
               type: string
-              description: Дата и время добавления записи
-              example: "2020-03-17 12:45:56"
+            photo:
+              type: string
+              description: Имя файла фото пользователя
+              example: user_tyt5yt2uy5uy5525uy6576677.jpg
+            photo_encrypted:
+              type: string
+              description: Если нет photo_url используется строка кодированная BASE64 содержащая код изображения
+              example: <BASE64>
             data:
               type: string
               description: Доболнительные поля с формате JSON строки
               example: '{ "docum": "23423423432"}'
-            deleted:
-              type: boolean
-              description: Пользователь помечан на удаление
-              example: false
-            id:
-              type: integer
-              example: 1
             is_twin:
               type: boolean
               description: Ключ для определения двойников
@@ -1097,26 +1427,34 @@ components:
             on_object:
               type: boolean
               description: Имеются ли у пользователя визиты
-            photo:
-              type: string
-              description: Имя файла фото пользователя
-              example: user_tyt5yt2uy5uy5525uy6576677.jpg
-            photo_encrypted:
-              type: string
-              description:
-                Если нет photo_url используется строка кодированная BASE64
-                содержащая код изображения
-              example: <BASE64>
-            subdivisions:
+            access_groups:
               type: array
               description: Список подключенных групп доступа
               items:
-                $ref: "#/components/schemas/AccessItem"
+                $ref: '#/components/schemas/AccessItem'
+            cards:
+              type: array
+              description: Список карт пользовыателя
+              items:
+                $ref: '#/components/schemas/AccessCards'
+            deleted:
+              type: boolean
+              description: Пользователь помечан на удаление
+              example: false
+            created_at:
+              type: string
+              description: Дата и время добавления записи
+              example: '2020-03-17 12:45:56'
             updated_at:
               type: string
               description: Дата и время изменения записи
-              example: "2020-03-17 12:45:56"
-
+              example: '2020-03-17 12:45:56'
+            deleted_at:
+              type: string
+              description: Дата и время удаления записи
+              example: '2020-03-17 12:45:56'
+            '':
+              type: string
     Pagination:
       type: object
       properties:
@@ -1134,19 +1472,19 @@ components:
       properties:
         external_id:
           type: string
-          example: "1"
+          example: '1'
         users_id:
           type: integer
           example: 1
         last_updated:
           type: string
-          example: "2020-12-01 17:23:04"
+          example: '2020-12-01 17:23:04'
     SubdivisionIds:
       type: object
       properties:
         external_id:
           type: string
-          example: "1"
+          example: '1'
         subdivisions_id:
           type: integer
           example: 1
@@ -1155,7 +1493,7 @@ components:
       properties:
         created_at:
           type: string
-          example: "2020-12-01"
+          example: '2020-12-01'
         external_id:
           type: string
         id:
@@ -1173,6 +1511,50 @@ components:
           items:
             type: integer
             example: 1
+        access:
+          $ref: '#/components/schemas/AccessItem'
+      required:
+        - id
+        - name
+    DepartmentIds:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: '1'
+        departments_id:
+          type: integer
+          example: 1
+    DepartmentExtItem:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: '2020-12-01'
+        external_id:
+          type: string
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+        parent_id:
+          type: integer
+      title: ''
+    DepartmentItem:
+      type: object
+      properties:
+        created_at:
+          type: string
+          example: '2020-12-01'
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+        parent_id:
+          type: integer
+      title: ''
     Success:
       required:
         - status
@@ -1180,9 +1562,26 @@ components:
       type: object
       properties:
         status:
-          $ref: "#/components/schemas/Status"
+          $ref: '#/components/schemas/Status'
         data:
           type: object
+    Problem:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+        data:
+          type: object
+      required:
+        - status
+        - data
+      x-examples:
+        example-1:
+          status:
+            code: 401
+            message: not authenticated
+          data: {}
+      title: Problem
     Status:
       type: object
       properties:
@@ -1191,24 +1590,15 @@ components:
           example: 0
         message:
           type: string
-          example: "OK"
+          example: OK
+      description: ''
     UserBase:
-      required:
-        - first_name
       type: object
       properties:
-        blacklisted:
-          type: boolean
-          description: Пользователь в черном списке
-          example: false
-        blocked:
-          type: boolean
-          description: Блокировка пользователя
-          example: false
         external_id:
           type: string
-          description: ID записи интегрируемого сервиса (Облако, СКУД)
-          example: "1"
+          description: 'ID записи интегрируемого сервиса (Облако, СКУД)'
+          example: '1'
         first_name:
           type: string
           description: Имя
@@ -1224,11 +1614,21 @@ components:
         phone:
           type: string
           description: Номер сотового телефона
-          example: "79223410000"
+          example: '79223410000'
         type_user:
           type: string
-          description: Тип пользователя (admin, guard, employee, guest)
+          description: 'Тип пользователя (admin, guard, employee, guest)'
           example: employee
+        blacklisted:
+          type: boolean
+          description: Пользователь в черном списке
+          example: false
+        blocked:
+          type: boolean
+          description: Блокировка пользователя
+          example: false
+      required:
+        - last_name
     Device:
       type: object
       properties:
@@ -1237,27 +1637,27 @@ components:
           example: 14
         name:
           type: string
-          example: "Device"
+          example: Device
         ip_address:
           type: string
-          example: "192.168.88.232"
+          example: 192.168.88.232
         purpose:
           type: string
-          example: "duplex"
+          example: duplex
         settings:
-          $ref: "#/components/schemas/DeviceSetting"
+          $ref: '#/components/schemas/DeviceSetting'
         created_at:
           type: string
-          example: "0001-01-01T00:00:00Z"
+          example: '0001-01-01T00:00:00Z'
         updated_at:
           type: string
-          example: "0001-01-01T00:00:00Z"
+          example: '0001-01-01T00:00:00Z'
     DeviceSetting:
       type: object
       properties:
         control_mode:
           type: string
-          example: "no"
+          example: 'no'
         recognition_range:
           type: integer
           example: 2
@@ -1273,7 +1673,7 @@ components:
           type: boolean
         system_mode:
           type: string
-          example: "default"
+          example: default
         show_fullname:
           type: boolean
         show_access:
@@ -1290,49 +1690,67 @@ components:
           example: 1
         external_id:
           type: string
-          example: "116998"
+          example: '116998'
         users_id:
           type: integer
           example: 11
         purpose:
           type: string
-          example: "entrance"
+          example: entrance
         event:
-          $ref: "#/components/schemas/EventData"
+          $ref: '#/components/schemas/EventData'
         Last:
           type: boolean
           example: false
         created_at:
           type: string
-          example: "0001-01-01T00:00:00Z"
+          example: '0001-01-01T00:00:00Z'
     EventData:
       type: object
       properties:
         temperature:
           type: string
-          example: "36.6"
+          example: '36.6'
         temperature_status:
           type: string
-          example: "norm"
+          example: norm
         type:
           type: string
-          example: "pass"
+          example: pass
         identity_types:
           type: string
-          example: "face"
+          example: face
         message:
           type: string
         zone:
           type: string
-          example: "zone 2"
+          example: zone 2
         zone_id:
           type: integer
           example: 2
         device_name:
           type: string
-          example: "device 1"
+          example: device 1
         device_uid:
           type: string
-          example: "f520a518-a61a-4814-bf81-b7e55ba44f4c"
-          
-      
+          example: f520a518-a61a-4814-bf81-b7e55ba44f4c
+  requestBodies: {}
+  parameters: {}
+  responses:
+    Unauthorized:
+      description: 'IID is wrong or Token mismatch '
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          examples:
+            Unauthorized:
+              value:
+                status:
+                  code: 401
+                  message: not authenticated
+                data: {}
+      headers: {}
+security:
+  - Token: []
+    IID: []
