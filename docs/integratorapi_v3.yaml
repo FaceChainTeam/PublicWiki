@@ -108,9 +108,29 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/SubdivisionItem'
+                    $ref: '#/components/schemas/SubdivisionItem'
+              examples:
+                example-1:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data:
+                      created_at: '2020-12-23T13:50:31.136531+03:00'
+                      external_id: ''
+                      id: 1
+                      name: string
+                      parent_id: 0
+                      zones_id:
+                        - 2
+                      access:
+                        - full_access: false
+                          weekdays: '1111100'
+                          time_from: '08:00'
+                          time_to: '20:00'
+                      is_guest: false
+                      cloud_id: ''
+                      updated_at: '2019-08-24T14:15:22Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -205,9 +225,29 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/SubdivisionItem'
+                    $ref: '#/components/schemas/SubdivisionItem'
+              examples:
+                example-1:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data:
+                      created_at: '2020-12-23T13:50:31.136531+03:00'
+                      external_id: ''
+                      id: 1
+                      name: string
+                      parent_id: 0
+                      zones_id:
+                        - 2
+                      access:
+                        - full_access: false
+                          weekdays: '1111100'
+                          time_from: '08:00'
+                          time_to: '20:00'
+                      is_guest: false
+                      cloud_id: ''
+                      updated_at: '2019-08-24T14:15:22Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -299,6 +339,28 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/SubdivisionItem'
+              examples:
+                example-1:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data:
+                      - created_at: '2020-12-23T13:50:31.136531+03:00'
+                        external_id: ''
+                        id: 1
+                        name: string
+                        parent_id: 0
+                        zones_id:
+                          - 2
+                        access:
+                          - full_access: false
+                            weekdays: '1111100'
+                            time_from: '08:00'
+                            time_to: '20:00'
+                        is_guest: false
+                        cloud_id: ''
+                        updated_at: '2019-08-24T14:15:22Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -1488,12 +1550,32 @@ components:
           example: 1
     SubdivisionItem:
       type: object
+      x-examples:
+        example-1:
+          created_at: '2020-12-23T13:50:31.136531+03:00'
+          external_id: ''
+          id: 1
+          name: string
+          parent_id: 0
+          zones_id:
+            - 2
+          access:
+            - full_access: false
+              weekdays: '1111100'
+              time_from: '08:00'
+              time_to: '20:00'
+          is_guest: false
+          cloud_id: ''
+          updated_at: '2019-08-24T14:15:22Z'
       properties:
         created_at:
           type: string
-          example: '2020-12-01'
+          format: date-time
+          minLength: 12
+          example: '2020-12-23T13:50:31.136531+03:00'
         external_id:
           type: string
+          default: ''
         id:
           type: integer
           example: 1
@@ -1501,16 +1583,42 @@ components:
           type: string
         parent_id:
           type: integer
-        schedules_id:
-          type: integer
-          example: 1
         zones_id:
           type: array
+          uniqueItems: true
           items:
             type: integer
-            example: 1
+            example: 2
         access:
-          $ref: '#/components/schemas/AccessItem'
+          type: array
+          items:
+            type: object
+            properties:
+              full_access:
+                type: boolean
+                default: false
+              weekdays:
+                type: string
+                pattern: '^[0-1]+'
+                example: '1111100'
+              time_from:
+                type: string
+                format: time
+                example: '08:00'
+              time_to:
+                type: string
+                format: time
+                example: '20:00'
+        is_guest:
+          type: boolean
+          default: false
+        cloud_id:
+          type: string
+          deprecated: true
+          default: ''
+        updated_at:
+          type: string
+          format: date-time
       required:
         - id
         - name
