@@ -46,9 +46,7 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/SubdivisionItem'
+                    $ref: '#/components/schemas/SubdivisionItem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -382,9 +380,7 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DepartmentItem'
+                    $ref: '#/components/schemas/DepartmentItem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -418,9 +414,7 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DepartmentItem'
+                    $ref: '#/components/schemas/DepartmentItem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
@@ -519,9 +513,7 @@ paths:
                   status:
                     $ref: '#/components/schemas/Status'
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DepartmentExtItem'
+                    $ref: '#/components/schemas/DepartmentExtItem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         default:
