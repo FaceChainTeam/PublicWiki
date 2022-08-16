@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Открытое API Ovision
-  description: Данное API предназначено для подключения СКУД систем к терминалу устройств O.Gate через открытый протокол openapi-3.0.0
+  description: Данное API предназначено для интеграции СКУД систем с OVISION GATE Control
   version: 1.0.0
   contact:
     name: OVISION Ltd

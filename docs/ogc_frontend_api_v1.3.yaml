@@ -1233,7 +1233,7 @@ paths:
     get:
       security:
         - bearerAuth: []
-      ta
+      tags:
         - Визиты
       summary: Список визитов
       description: Возвращает список визитов из СКУД.
@@ -4312,4 +4312,3 @@ components:
               type: string
               description: ID записи интегрируемого сервиса (Облако, СКУД)
               example: ""
-              
