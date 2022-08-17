@@ -1406,10 +1406,8 @@ components:
                 type: integer
                 example: 2
             departments_id:
-              type: array
-              description: Список ID департаментов
-              items:
-                type: integer
+              description: ID подразделения
+              type: integer
             is_twin:
               type: boolean
               description: Ключ для определения двойников
