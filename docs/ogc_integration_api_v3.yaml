@@ -1731,7 +1731,8 @@ components:
         mask_enabled:
           type: boolean
         temperature_enable:
-          type: boolean
+          type: string
+          example: 'off'
         system_mode:
           type: string
           example: default

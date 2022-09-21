@@ -3957,6 +3957,10 @@ components:
         users_id:
           type: integer
           example: 1
+        external_id:
+          description: id во внешней системе, если запись получена путем интеграции
+          type: string
+          example: "234"  
         purpose:
           type: string
           example: exit
@@ -3989,9 +3993,9 @@ components:
           description: "значение идентификации (для card и qr)"
           example: ""
         code:
-          type: integer
-          description: "код события"
-          example: 35
+          type: string
+          description: "код события (обычно число, но возвращается в виде строки)"
+          example: "35"
         message:
           type: string
           example: "user_passed"
