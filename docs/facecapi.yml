@@ -1,0 +1,184 @@
+openapi: 3.0.3
+x-stoplight:
+  id: zxcseu52pq9vp
+info:
+  title: Swagger Face API - OpenAPI 3.0
+  version: 1.0.11
+tags:
+  - name: ordinary biometric processor
+    description: Взаимодействие клиент-сервер
+  - name: async biometric processor
+    description: Взаимодействие клиент-сервер-callback
+paths:
+  /vector:
+    post:
+      tags:
+        - ordinary biometric processor
+      summary: Add a new vector from photo to the storage
+      description: Add a new vector from photo to the storage
+      operationId: addVector
+      requestBody:
+        description: Create a new vector from photo to the storage
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vector'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessVectorResponse'
+        '400':
+          description: Client problem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnsuccessVectorResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (billing or permissions problem)
+        '500':
+          description: Server problem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnsuccessVectorResponse'
+      security:
+        - face_api_auth:
+            - 'write:vectors'
+            - 'read:vectors'
+components:
+  schemas:
+    AlignCropSize:
+      type: object
+      properties:
+        height:
+          type: integer
+          example: 250
+        width:
+          type: integer
+          example: 250
+    AlignTransformComponent:
+      type: object
+      properties:
+        shift_x:
+          type: integer
+          example: 0
+        shift_y:
+          type: integer
+          example: 0
+        rotation:
+          type: integer
+          example: 0
+        scale:
+          type: integer
+          example: 0
+        top:
+          type: integer
+          example: 0
+        left:
+          type: integer
+          example: 0
+        bottom:
+          type: integer
+          example: 0
+        right:
+          type: integer
+          example: 0
+    Status:
+      type: object
+      properties:
+        code:
+          type: string
+          format: string
+          example: REG-0000000
+        message:
+          type: string
+          example: ok
+    Metadata:
+      type: object
+      properties:
+        template_id:
+          type: string
+          format: string
+          example: b730875a-cfc4-4b07-b539-052c65663766
+        metadata:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Dog
+            surname:
+              type: string
+              example: GoodBoy
+    Model:
+      type: object
+      properties:
+        model_name:
+          type: string
+          format: string
+          example: ExtractorPytorchFullFaceBasicSFace
+        model_version:
+          type: string
+          format: string
+          example: 0.1
+    Vector:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/Metadata'
+        photo:
+          type: string
+          format: binary
+    SuccessVectorResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+        advanced_box:
+          type: array
+          items:
+            type: integer
+          example:
+            - 0
+            - 0
+            - 0
+            - 0
+        face_align_crop_size:
+          $ref: '#/components/schemas/AlignCropSize'
+        face_align_transform_components:
+          $ref: '#/components/schemas/AlignTransformComponent'
+        external_template_id:
+          type: string
+          format: string
+          example: b730875a-cfc4-4b07-b539-052c65663766
+        metadata:
+          $ref: '#/components/schemas/Model'
+    UnsuccessVectorResponse:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+        external_template_id:
+          type: string
+          format: string
+          example: b730875a-cfc4-4b07-b539-052c65663766
+        metadata:
+          $ref: '#/components/schemas/Model'
+  securitySchemes:
+    face_api_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://ovision.swagger.io/oauth/authorize'
+          scopes:
+            'write:vectors': modify vectors in your account
+            'read:vectors': read your vectors
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
