@@ -1,4 +1,4 @@
-# Description
+# Установка OGATEControl на Ubuntu Linux
 
 -----------------------------
 
