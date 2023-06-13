@@ -1,11 +1,13 @@
 openapi: 3.0.1
 info:
-  title: API Терминала O.Vision
-  description: Данное API предназначено для взаимодействия админки с терминалом
-    через открытый протокол openapi-3.0.1
+  title: Frontend API OVISION Gate Control (oport)
+  description: Данное API предназначено для взаимодействия админки с терминалом через открытый протокол openapi-3.0.1
   version: 2.0.0
+  contact:
+    name: Sergey Schelkonogov
+    email: ssch@ovision.ru
 servers:
-  - url: http://localhost:8000/
+  - url: 'http://localhost:8000'
 tags:
   - name: Авторизация
     description: Методы авторизации Терминала
@@ -37,20 +39,16 @@ tags:
     description: Методы для работы с настройками терминала
   - name: Отчеты
     description: Методы для работы с отчетами
-  # - name: Интеграции
-  #   description: Методы для работы с интеграциями
   - name: Служебные
     description: Методы для обслуживания терминала
-
 paths:
   /auth/login:
     post:
+      operationId: auth_login_post
       tags:
         - Авторизация
       summary: Авторизация
-      description:
-        Получение токена по логину и паролю, результатом будет Bearer токен
-        в head.Authorize
+      description: 'Получение токена по логину и паролю, результатом будет Bearer токен в head.Authorize'
       requestBody:
         description: Список ID для пометки на удаление
         content:
@@ -64,27 +62,29 @@ paths:
                   type: string
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessToken"
-        401:
+                $ref: '#/components/schemas/SuccessToken'
+        '401':
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /auth/user:
     get:
+      operationId: auth_user_get      
       security:
         - bearerAuth: []
       tags:
         - Авторизация
+      description: get authentificated user's info  
       summary: Учетная запись
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -92,37 +92,38 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/AuthUser"
+                    $ref: '#/components/schemas/AuthUser'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /auth/refresh:
     get:
+      operationId: auth_refresh_get      
       tags:
         - Авторизация
       summary: Обновление токена авторизации
-      description: "В параметре Header Authorization передается Bearer (refresh_token) не реже 10 мин"
+      description: В параметре Header Authorization передается Bearer (refresh_token) не реже 10 мин
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessToken"
-        401:
-          description: "unexpected error"
+                $ref: '#/components/schemas/SuccessToken'
+        '401':
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
+                $ref: '#/components/schemas/Error'
   /api/v1/users:
     get:
+      operationId: users_get
       security:
         - bearerAuth: []
       tags:
@@ -148,29 +149,29 @@ paths:
             example: 30
         - in: query
           name: search
-          description: "Строка поиска"
+          description: Строка поиска
           schema:
             type: string
         - in: query
           name: mode
-          description: "Режим фильтра (noerrors, errors, blocks, blacks, deleted)"
+          description: 'Режим фильтра (noerrors, errors, blocks, blacks, deleted)'
           schema:
             type: string
-            example: "all"
+            example: all
         - in: query
           name: typeuser
-          description: "Тип пользователя (guest, employee)"
+          description: 'Тип пользователя (guest, employee)'
           schema:
             type: string
-            example: "all"
+            example: all
         - in: query
           name: subdivision
-          description: "Список ID групп доступа через запятую (1,2,3)"
+          description: 'Список ID групп доступа через запятую (1,2,3)'
           schema:
             type: string
-            example: "1,2,3"
+            example: '1,2,3'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -178,40 +179,41 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Users"
+                      $ref: '#/components/schemas/Users'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
-        500:
+                        $ref: '#/components/schemas/Pagination'
+        '500':
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: Unexpected error
           content: {}
   /api/v1/user/add:
     post:
+      operationId: user_add_post      
       security:
         - bearerAuth: []
       tags:
         - Пользователи
-      summary: Добавить пользователя
+      description: Добавить пользователя
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ItemUserIn"
+              $ref: '#/components/schemas/ItemUserIn'
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -219,23 +221,24 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ItemUserOut"
-        400:
+                    $ref: '#/components/schemas/ItemUserOut'
+        '400':
           description: Неверная структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/user/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/user/{id}':
     get:
+      operationId: user_byid_get      
       security:
         - bearerAuth: []
       tags:
@@ -249,9 +252,9 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -259,16 +262,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ItemUserOut"
+                    $ref: '#/components/schemas/ItemUserOut'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     post:
+      operationId: user_byid_post
       security:
         - bearerAuth: []
       tags:
@@ -286,36 +290,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ItemUserIn"
+              $ref: '#/components/schemas/ItemUserIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
-        400:
+                $ref: '#/components/schemas/SuccessOK'
+        '400':
           description: Ошибка структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
+                $ref: '#/components/schemas/Error'
   /api/v1/user/delete:
     put:
+      operationId: user_delete_put
       security:
         - bearerAuth: []
       tags:
@@ -336,20 +340,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/blocked:
     put:
+      operationId: user_blocked_put
       security:
         - bearerAuth: []
       tags:
@@ -370,20 +375,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/unblocked:
     put:
+      operationId: user_unblocked_put
       security:
         - bearerAuth: []
       tags:
@@ -404,20 +410,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/user/{id}/refeature:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/user/{id}/refeature':
     put:
+      operationId: user_byid_refeature_put
       security:
         - bearerAuth: []
       tags:
@@ -431,23 +438,23 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
+                $ref: '#/components/schemas/Error'
   /api/v1/user/blacklisted:
     put:
+      operationId: user_blacklisted_put      
       security:
         - bearerAuth: []
       tags:
@@ -468,20 +475,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /user/unblacklisted:
     put:
+      operationId: user_unblacklisted_put      
       security:
         - bearerAuth: []
       tags:
@@ -502,20 +510,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/restore:
     put:
+      operationId: user_restore_put      
       security:
         - bearerAuth: []
       tags:
@@ -536,20 +545,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/clear:
     put:
+      operationId: user_clear_put      
       security:
         - bearerAuth: []
       tags:
@@ -570,20 +580,21 @@ paths:
                     example: 1
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/users/trash:
     delete:
+      operationId: users_trash_delete      
       security:
         - bearerAuth: []
       tags:
@@ -591,20 +602,21 @@ paths:
       summary: Удалить помеченных пользователей
       description: Удалить всех помеченных на удаление пользователей
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/users/all:
     delete:
+      operationId: users_all_delete      
       security:
         - bearerAuth: []
       tags:
@@ -612,20 +624,21 @@ paths:
       summary: Удалить всех пользователей
       description: Удалить всех пользователей
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/import:
     post:
+      operationId: user_import_post      
       security:
         - bearerAuth: []
       tags:
@@ -635,7 +648,7 @@ paths:
       requestBody:
         description: Файл в формате *.uovb
         content:
-          "multipart/form-data":
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -644,20 +657,21 @@ paths:
                   format: binary
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/export:
     get:
+      operationId: user_export_get      
       security:
         - bearerAuth: []
       tags:
@@ -673,7 +687,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: Файл uovb
           content:
             application/gzip:
@@ -685,19 +699,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/user/import/photo:
     post:
+      operationId: user_import_photo_post      
       security:
         - bearerAuth: []
       tags:
         - Пользователи
-      summary: Импорт файла *.png, *.jpg, *.bmp
+      summary: 'Импорт файла *.png, *.jpg, *.bmp'
       description: Импорт файла резервной копии пользовалелей
       requestBody:
         description: Файл в формате *.uovb
         content:
-          "image/*":
+          image/*:
             schema:
               type: object
               properties:
@@ -706,20 +721,21 @@ paths:
                   format: binary
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/user/{id}/visits:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/user/{id}/visits':
     get:
+      operationId: user_byid_visits_get      
       security:
         - bearerAuth: []
       tags:
@@ -736,12 +752,12 @@ paths:
             format: int64
         - in: query
           name: month
-          description: "Год и месяц (YYYY-MM)"
+          description: Год и месяц (YYYY-MM)
           schema:
             type: string
-            example: "2021-01"
+            example: 2021-01
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -749,17 +765,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/OutVisits"
+                    $ref: '#/components/schemas/OutVisits'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/users/multi/sdv:
     post:
+      operationId: user_multi_sdv_post      
       security:
         - bearerAuth: []
       tags:
@@ -774,36 +791,37 @@ paths:
               type: object
               properties:
                 ids:
-                  description: "Список ID пользователей"
+                  description: Список ID пользователей
                   type: array
                   items:
                     type: integer
                     example: 100
                 subdivisions:
-                  description: "Список ID групп доступа"
+                  description: Список ID групп доступа
                   type: array
                   items:
                     type: integer
                     example: 1
                 action:
-                  description: "список акций (sdv_add, sdv_upd, sdv_del)"
+                  description: 'список акций (sdv_add, sdv_upd, sdv_del)'
                   type: string
-                  example: "sdv_add"
+                  example: sdv_add
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/company:
     get:
+      operationId: company_get      
       security:
         - bearerAuth: []
       tags:
@@ -811,7 +829,7 @@ paths:
       summary: Список компаний
       description: Возвращает список компаний.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -819,33 +837,34 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Company"
-
+                      $ref: '#/components/schemas/Company'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/company/add:
     post:
+      operationId: compoany_add_post      
       security:
         - bearerAuth: []
       tags:
         - Компании
+      description: 'Добавление компании'
       summary: Добавить компанию
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CompanyIn"
+              $ref: '#/components/schemas/CompanyIn'
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -853,17 +872,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Company"
+                    $ref: '#/components/schemas/Company'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/company/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/company/{id}':
     get:
+      operationId: company_byid_get      
       security:
         - bearerAuth: []
       tags:
@@ -877,9 +897,9 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -887,16 +907,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Company"
+                    $ref: '#/components/schemas/Company'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: company_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -914,22 +935,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CompanyIn"
+              $ref: '#/components/schemas/CompanyIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: company_by_id_delete      
       security:
         - bearerAuth: []
       tags:
@@ -944,21 +966,21 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
+                $ref: '#/components/schemas/Error'
   /api/v1/guards:
     get:
+      operationId: guards_get      
       security:
         - bearerAuth: []
       tags:
@@ -983,7 +1005,7 @@ paths:
             format: int64
             example: 30
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -991,37 +1013,38 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Users"
+                      $ref: '#/components/schemas/Users'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/guard/add:
     post:
+      operationId: guard_add_post      
       security:
         - bearerAuth: []
       tags:
         - Операторы
-      summary: Добавить оператора
+      description: Добавить оператора
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GuardIn"
+              $ref: '#/components/schemas/GuardIn'
         required: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1029,17 +1052,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/UserOut"
+                    $ref: '#/components/schemas/UserOut'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/guard/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/guard/{id}':
     get:
+      operationId: guard_byid_get      
       security:
         - bearerAuth: []
       tags:
@@ -1053,9 +1077,9 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
@@ -1063,28 +1087,29 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/UserOut"
-        400:
+                    $ref: '#/components/schemas/UserOut'
+        '400':
           description: Ошибка структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     post:
+      operationId: guard_byid_post      
       security:
         - bearerAuth: []
       tags:
@@ -1102,34 +1127,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GuardIn"
+              $ref: '#/components/schemas/GuardIn'
         required: false
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
-        400:
+                $ref: '#/components/schemas/SuccessOK'
+        '400':
           description: Ошибка структура данных
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        422:
+                $ref: '#/components/schemas/Error'
+        '422':
           description: Не найден пользователь в базе
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: guard_byuid_delete      
       security:
         - bearerAuth: []
       tags:
@@ -1144,20 +1170,21 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/requests:
     get:
+      operationId: requests_get
       security:
         - bearerAuth: []
       tags:
@@ -1167,7 +1194,7 @@ paths:
       parameters:
         - in: query
           name: owner_id
-          description: ID учетной записи администратора, оператора, менеджера из таблицы admins
+          description: 'ID учетной записи администратора, оператора, менеджера из таблицы admins'
           required: false
           schema:
             type: integer
@@ -1204,7 +1231,7 @@ paths:
             type: boolean
             example: false
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1212,25 +1239,25 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Request"
+                      $ref: '#/components/schemas/Request'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-                
+                $ref: '#/components/schemas/Error'
   /api/v1/visitors:
     get:
+      operationId: visitors_get      
       security:
         - bearerAuth: []
       tags:
@@ -1254,7 +1281,7 @@ paths:
             type: boolean
             example: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1262,30 +1289,30 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/VisitOut"
+                      $ref: '#/components/schemas/VisitOut'
                   meta:
                     type: object
                     properties:
                       latestvisit:
                         type: integer
                         format: int64
-
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/alarmvisits:
     get:
       security:
         - bearerAuth: []
       tags:
         - Визиты
+      operationId: get_alarm_visits
       summary: Список незарегистрированных визитеров
       description: Возвращает список незарегистрированных визитов из терминала.
       parameters:
@@ -1318,30 +1345,30 @@ paths:
           required: false
           schema:
             type: string
-            example: "2022-05-31T21:00:00.000Z"
+            example: '2022-05-31T21:00:00.000Z'
         - in: query
           name: endDate
           description: Конечная дата
           required: false
           schema:
             type: string
-            example: "2022-07-30T21:00:00.000Z"
+            example: '2022-07-30T21:00:00.000Z'
         - in: query
-          name: type[]
-          description: Массив событий (pass,before,alarm,error)
+          name: 'type[]'
+          description: 'Массив событий (pass,before,alarm,error)'
           required: false
           schema:
             type: string
-            example: "pass"
+            example: pass
         - in: query
-          name: identityTypes[]
-          description: Массив типов идентификации (face,card,qr)
+          name: 'identityTypes[]'
+          description: 'Массив типов идентификации (face,card,qr)'
           required: false
           schema:
             type: string
-            example: "face"
+            example: face
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1349,24 +1376,25 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Event"
+                      $ref: '#/components/schemas/Event'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/alarmvisit/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/alarmvisit/{id}':
     delete:
+      operationId: alarmvisits_byid_delete      
       security:
         - bearerAuth: []
       tags:
@@ -1381,20 +1409,21 @@ paths:
           schema:
             type: integer
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/visit/log:
     get:
+      operationId: visit_log_get
       security:
         - bearerAuth: []
       tags:
@@ -1414,16 +1443,57 @@ paths:
           required: false
           schema:
             type: string
-            example: "2021-01-01"
+            example: '2021-01-01'
         - in: query
           name: endDate
           description: Дата завершения
           required: false
           schema:
             type: string
-            example: "2021-01-31"
+            example: '2021-01-31'
+        - schema:
+            type: array
+          in: query
+          name: subdivisions
+          description: 'фильтр по уровням доступа ([идентификаторы])'
+        - schema:
+            type: array
+          in: query
+          name: departments
+          description: 'фильтр по подразделениям ([id1, id2])'
+        - schema:
+            type: array
+          in: query
+          name: userType
+          description: 'фильтр по типам пользователей (["guest"])'
+        - schema:
+            type: boolean
+          in: query
+          name: isOnObject
+          description: 'только тех, кто сейчас на объекте'
+        - schema:
+            type: string
+          in: query
+          name: sortName
+          description: имя поля для сортировки
+        - schema:
+            type: string
+          in: query
+          name: sortOrder
+          description: направление сортировки
+        - schema:
+            type: integer
+            default: 30
+          in: query
+          name: limit
+          description: сколько событий выдавать на странице (30 по умолчанию)
+        - schema:
+            type: string
+          in: query
+          name: page
+          description: номер страницы (см limit)
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1431,25 +1501,25 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/VisitOut"
+                      $ref: '#/components/schemas/VisitOut'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
-
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/visit/close:
     put:
+      operationId: visit_close_put
       security:
         - bearerAuth: []
       tags:
@@ -1469,20 +1539,21 @@ paths:
                     type: integer
                     example: 1
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/advanced/log:
     get:
+      operationId: advanced_log_get      
       security:
         - bearerAuth: []
       tags:
@@ -1516,9 +1587,9 @@ paths:
           required: false
           schema:
             type: string
-            example: "2021-01-01"
+            example: '2021-01-01'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1526,25 +1597,25 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/VisitLog"
+                      $ref: '#/components/schemas/VisitLog'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
-
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/getEvents:
     get:
+      operationId: get_events_get      
       security:
         - bearerAuth: []
       tags:
@@ -1570,7 +1641,7 @@ paths:
             example: 1512753478
         - in: query
           name: type
-          description: Тип события (pass,before,alarm,error)
+          description: 'Тип события (pass,before,alarm,error)'
           required: false
           schema:
             type: string
@@ -1591,8 +1662,13 @@ paths:
             type: integer
             format: int64
             example: 1
+        - schema:
+            type: boolean
+          in: query
+          name: all
+          description: Получить события по всем интеграциям (iid=0)
       responses:
-        200:
+        '200':
           description: Device response!
           content:
             application/json:
@@ -1600,11 +1676,11 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Event"
+                      $ref: '#/components/schemas/Event'
                   meta:
                     type: object
                     properties:
@@ -1615,17 +1691,16 @@ paths:
                         type: integer
                         example: 0
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Ошибка
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"    
-
-  
+                $ref: '#/components/schemas/Error'
   /api/v1/devices:
     get:
+      operationId: devices_get
       security:
         - bearerAuth: []
       tags:
@@ -1655,7 +1730,7 @@ paths:
             type: integer
             example: 0
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1663,24 +1738,25 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Device"
+                      $ref: '#/components/schemas/Device'
                   meta:
                     type: object
                     properties:
                       pagination:
-                        $ref: "#/components/schemas/Pagination"
+                        $ref: '#/components/schemas/Pagination'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/device/add:
     post:
+      operationId: device_add_post
       security:
         - bearerAuth: []
       tags:
@@ -1691,10 +1767,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SetDevice"
+              $ref: '#/components/schemas/SetDevice'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1702,17 +1778,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Device"
+                    $ref: '#/components/schemas/Device'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/device/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/device/{id}':
     get:
+      operationId: device_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -1726,9 +1803,9 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1736,16 +1813,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Device"
+                    $ref: '#/components/schemas/Device'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: device_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -1764,23 +1842,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SetDevice"
+              $ref: '#/components/schemas/SetDevice'
         required: true
-
       responses:
-        200:
+        '200':
           description: User response!
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: device_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -1794,22 +1872,23 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/device/scan:
     get:
+      operationId: device_scan_get
       security:
         - bearerAuth: []
       tags:
@@ -1817,7 +1896,7 @@ paths:
       summary: Сканировать устройства
       description: Метод сканирует биометрические устройства в текущей подсети
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1825,14 +1904,15 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
                       type: string
-                      example: "192.168.1.100"
-  /api/v1/device/{id}/sync:
+                      example: 192.168.1.100
+  '/api/v1/device/{id}/sync':
     post:
+      operationId: device_byid_sync_post
       security:
         - bearerAuth: []
       tags:
@@ -1856,20 +1936,21 @@ paths:
                 timestamp:
                   type: integer
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/device/{id}/status:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/device/{id}/status':
     get:
+      operationId: device_id_status_get
       security:
         - bearerAuth: []
       tags:
@@ -1883,23 +1964,23 @@ paths:
           required: true
           schema:
             type: integer
-            format: int64,
+            format: 'int64,'
       responses:
-        200:
+        '200':
           description: Получает ответ от устройства /get_settings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  # Подразделения
+                $ref: '#/components/schemas/Error'
   /api/v1/departments:
     get:
+      operationId: departments_get
       security:
         - bearerAuth: []
       tags:
@@ -1907,7 +1988,7 @@ paths:
       summary: Список подразделений
       description: Возвращает список подразделений.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1915,19 +1996,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Department"
+                      $ref: '#/components/schemas/Department'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/departments/tree:
     get:
+      operationId: departments_tree_get
       security:
         - bearerAuth: []
       tags:
@@ -1935,7 +2017,7 @@ paths:
       summary: Дерево групп доступа
       description: Возвращает группы доступа в виде дерева.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1943,19 +2025,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/TreeSubdivision"
+                      $ref: '#/components/schemas/TreeSubdivision'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/department/add:
     post:
+      operationId: department_add_post
       security:
         - bearerAuth: []
       tags:
@@ -1966,10 +2049,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DepartmentIn"
+              $ref: '#/components/schemas/DepartmentIn'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -1977,17 +2060,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Department"
+                    $ref: '#/components/schemas/Department'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/department/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/department/{id}':
     get:
+      operationId: department_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -2003,7 +2087,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2011,16 +2095,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Department"
+                    $ref: '#/components/schemas/Department'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: department_by_id_put
       security:
         - bearerAuth: []
       tags:
@@ -2039,22 +2124,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DepartmentIn"
+              $ref: '#/components/schemas/DepartmentIn'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: department_byid_delete      
       security:
         - bearerAuth: []
       tags:
@@ -2070,25 +2156,21 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
-
-
-
-  # Группы доступа
+                $ref: '#/components/schemas/Error'
   /api/v1/subdivisions:
     get:
+      operationId: subdivisions_get      
       security:
         - bearerAuth: []
       tags:
@@ -2096,7 +2178,7 @@ paths:
       summary: Список групп доступа
       description: Возвращает список групп доступа.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2104,19 +2186,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/SubdivisionItem"
+                      $ref: '#/components/schemas/SubdivisionItem'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/subdivisions/tree:
     get:
+      operationId: subdivisions_tree_get      
       security:
         - bearerAuth: []
       tags:
@@ -2124,7 +2207,7 @@ paths:
       summary: Дерево групп доступа
       description: Возвращает группы доступа в виде дерева.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2132,19 +2215,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/TreeSubdivision"
+                      $ref: '#/components/schemas/TreeSubdivision'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/subdivision/add:
     post:
+      operationId: subdivision_add_post
       security:
         - bearerAuth: []
       tags:
@@ -2155,10 +2239,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SubdivisionAdd"
+              $ref: '#/components/schemas/SubdivisionAdd'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2166,17 +2250,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/SubdivisionItem"
+                    $ref: '#/components/schemas/SubdivisionItem'
         default:
-          description: "unexpected error"
+          description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/subdivision/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/subdivision/{id}':
     get:
+      operationId: subdivision_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -2192,7 +2277,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2200,16 +2285,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/SubdivisionItem"
+                    $ref: '#/components/schemas/SubdivisionItem'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: subdivision_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -2228,22 +2314,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SubdivisionAdd"
+              $ref: '#/components/schemas/SubdivisionAdd'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: subdivision_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -2259,20 +2346,21 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/subdivisions/all:
     delete:
+      operationId: subdivisions_all_delete
       security:
         - bearerAuth: []
       tags:
@@ -2280,22 +2368,21 @@ paths:
       summary: Удалуние групп доступа
       description: Метод удаляет всех групп доступа.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        
-  # Зоны доступа
+                $ref: '#/components/schemas/Error'
   /api/v1/zones:
     get:
+      operationId: zones_get
       security:
         - bearerAuth: []
       tags:
@@ -2303,7 +2390,7 @@ paths:
       summary: Список зон доступа
       description: Возвращает список зон доступа.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2311,19 +2398,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Zone"
+                      $ref: '#/components/schemas/Zone'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/zone/add:
     post:
+      operationId: zone_add_post      
       security:
         - bearerAuth: []
       tags:
@@ -2334,9 +2422,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ZoneIn"
+              $ref: '#/components/schemas/ZoneIn'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2344,17 +2432,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Zone"
+                    $ref: '#/components/schemas/Zone'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/zone/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/zone/{id}':
     get:
+      operationId: zone_byid_get      
       security:
         - bearerAuth: []
       tags:
@@ -2370,7 +2459,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2378,17 +2467,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Zone"
-
+                    $ref: '#/components/schemas/Zone'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: zone_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -2407,22 +2496,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ZoneIn"
+              $ref: '#/components/schemas/ZoneIn'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: zone_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -2438,21 +2528,21 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  # Карты доступа
-  /api/v1/cards/{uid}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/cards/{uid}':
     get:
+      operationId: cards_by_id_get
       security:
         - bearerAuth: []
       tags:
@@ -2468,7 +2558,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2476,20 +2566,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Card"
-
+                      $ref: '#/components/schemas/Card'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/card/add:
     post:
+      operationId: card_add_post
       security:
         - bearerAuth: []
       tags:
@@ -2500,9 +2590,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccessCards"
+              $ref: '#/components/schemas/AccessCards'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2510,17 +2600,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Card"
+                    $ref: '#/components/schemas/Card'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /card/{id}:
+                $ref: '#/components/schemas/Error'
+  '/card/{id}':
     get:
+      operationId: card_id_get      
       security:
         - bearerAuth: []
       tags:
@@ -2536,7 +2627,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2544,17 +2635,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/Card"
-
+                    $ref: '#/components/schemas/Card'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: card_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -2573,22 +2664,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Card"
+              $ref: '#/components/schemas/Card'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: card_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -2604,21 +2696,21 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  # Расписания
+                $ref: '#/components/schemas/Error'
   /api/v1/schedules:
     get:
+      operationId: schedules_get      
       security:
         - bearerAuth: []
       tags:
@@ -2626,7 +2718,7 @@ paths:
       summary: Список расписаний
       description: Возвращает список расписаний.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2634,19 +2726,20 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/ScheduleOut"
+                      $ref: '#/components/schemas/ScheduleOut'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/schedule/add:
     post:
+      operationId: schedule_add_post
       security:
         - bearerAuth: []
       tags:
@@ -2657,10 +2750,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Schedule"
+              $ref: '#/components/schemas/Schedule'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2668,17 +2761,18 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ScheduleOut"
+                    $ref: '#/components/schemas/ScheduleOut'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/schedule/{id}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/schedule/{id}':
     get:
+      operationId: schedule_id_get      
       security:
         - bearerAuth: []
       tags:
@@ -2694,7 +2788,7 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2702,17 +2796,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
-                    $ref: "#/components/schemas/ScheduleOut"
+                    $ref: '#/components/schemas/ScheduleOut'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-
+                $ref: '#/components/schemas/Error'
     put:
+      operationId: schedule_byid_put
       security:
         - bearerAuth: []
       tags:
@@ -2731,22 +2825,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Schedule"
+              $ref: '#/components/schemas/Schedule'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     delete:
+      operationId: schedule_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -2762,20 +2857,21 @@ paths:
             type: integer
             format: int64
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/settings:
     get:
+      operationId: settings_get
       security:
         - bearerAuth: []
       tags:
@@ -2783,7 +2879,7 @@ paths:
       summary: Список параметров
       description: Метод возвращает список параметров
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2791,7 +2887,7 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: array
                     items:
@@ -2802,10 +2898,10 @@ paths:
                           example: 1
                         key:
                           type: string
-                          example: "SERVER_URL"
+                          example: SERVER_URL
                         value:
                           type: string
-                          example: "http://192.168.1.100:8000"
+                          example: 'http://192.168.1.100:8000'
                   meta:
                     type: object
                     properties:
@@ -2817,8 +2913,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
     post:
+      operationId: settings_post
       security:
         - bearerAuth: []
       tags:
@@ -2835,27 +2932,27 @@ paths:
                 properties:
                   key:
                     type: string
-                    example: "SERVER_URL"
+                    example: SERVER_URL
                   value:
                     type: string
-                    example: "http://192.168.1.100:8000"
-
+                    example: 'http://192.168.1.100:8000'
         required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /api/v1/setting/{key}:
+                $ref: '#/components/schemas/Error'
+  '/api/v1/setting/{key}':
     get:
+      operationId: settings_by_key_get
       security:
         - bearerAuth: []
       tags:
@@ -2871,7 +2968,7 @@ paths:
             type: string
             example: SERVER_URL
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2879,21 +2976,22 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: object
                     properties:
                       value:
                         type: string
-                        example: "http://192.168.1.100:8000"
+                        example: 'http://192.168.1.100:8000'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/setting/getUrl:
     get:
+      operationId: settings_geturl_get
       security:
         - bearerAuth: []
       tags:
@@ -2901,7 +2999,7 @@ paths:
       summary: URL терминала
       description: Метод возвращает URL терминала
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2909,27 +3007,28 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: object
                     properties:
                       url:
                         type: string
-                        example: "http://192.168.1.100:8000"
+                        example: 'http://192.168.1.100:8000'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/setting/default:
     get:
+      operationId: settings_default_get
       tags:
         - Параметры
       summary: Стартовые параметры
       description: Метод возвращает язык и единицы измерения температуры
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2937,43 +3036,44 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: object
                     properties:
                       lang:
                         type: string
-                        example: "ru"
+                        example: ru
                       show:
-                        description: "Отображать переключатель языков"
+                        description: Отображать переключатель языков
                         type: boolean
                       temp_meas:
-                        description: "Символ отображения температуры"
+                        description: Символ отображения температуры
                         type: string
                       temperature_range:
-                        description: "Диаппазон температур"
+                        description: Диаппазон температур
                         type: string
-                        example: "34,37.2"
+                        example: '34,37.2'
                       temperature_enabled:
-                        description: "Использовать температуру"
+                        description: Использовать температуру
                         type: boolean
                       temperature_rise:
-                        description: "Скрывать температуру - только сообщение"
+                        description: Скрывать температуру - только сообщение
                         type: boolean
                       antispoofing_enabled:
-                        description: "Использовать антиспуффинг"
+                        description: Использовать антиспуффинг
                         type: boolean
                       antipassback_enabled:
-                        description: "Использовать блокировку двойного прохода"
+                        description: Использовать блокировку двойного прохода
                         type: boolean
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/report/worktime:
     get:
+      operationId: report_worktime_get
       security:
         - bearerAuth: []
       tags:
@@ -2983,30 +3083,30 @@ paths:
       parameters:
         - in: query
           name: lang
-          description: Язык отчета (ru, en)
+          description: 'Язык отчета (ru, en)'
           required: false
           schema:
             type: string
             example: ru
         - in: query
           name: search
-          description: "Строка поиска"
+          description: Строка поиска
           schema:
             type: string
         - in: query
           name: startDate
-          description: "Начальная дата поиска"
+          description: Начальная дата поиска
           schema:
             type: string
-            example: "2021-01-01 00:00:00"
+            example: '2021-01-01 00:00:00'
         - in: query
           name: endDate
-          description: "Конечная дата поиска (включительно)"
+          description: Конечная дата поиска (включительно)
           schema:
             type: string
-            example: "2021-02-01 23:59:59"
+            example: '2021-02-01 23:59:59'
       responses:
-        200:
+        '200':
           description: Файл xlsx
           content:
             application/xlsx:
@@ -3018,9 +3118,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/report/passed:
     get:
+      operationId: report_passed_get
       security:
         - bearerAuth: []
       tags:
@@ -3030,36 +3131,35 @@ paths:
       parameters:
         - in: query
           name: lang
-          description: Язык отчета (ru, en)
+          description: 'Язык отчета (ru, en)'
           required: false
           schema:
             type: string
             example: ru
         - in: query
           name: search
-          description: "Строка поиска"
+          description: Строка поиска
           schema:
             type: string
         - in: query
           name: startDate
-          description: "Начальная дата поиска"
+          description: Начальная дата поиска
           schema:
             type: string
-            example: "2021-01-01 00:00:00"
+            example: '2021-01-01 00:00:00'
         - in: query
           name: endDate
-          description: "Конечная дата поиска (включительно)"
+          description: Конечная дата поиска (включительно)
           schema:
             type: string
-            example: "2021-02-01 23:59:00"
+            example: '2021-02-01 23:59:00'
         - in: query
           name: istemp
-          description: "Флаг-фильтр - выводить только с повышенной температурой"
+          description: Флаг-фильтр - выводить только с повышенной температурой
           schema:
             type: boolean
-
       responses:
-        200:
+        '200':
           description: Файл xlsx
           content:
             application/xlsx:
@@ -3071,9 +3171,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/report/occup:
     get:
+      operationId: report_occup_get
       security:
         - bearerAuth: []
       tags:
@@ -3083,13 +3184,13 @@ paths:
       parameters:
         - in: query
           name: lang
-          description: Язык отчета (ru, en)
+          description: 'Язык отчета (ru, en)'
           required: false
           schema:
             type: string
             example: ru
       responses:
-        200:
+        '200':
           description: Файл xlsx
           content:
             application/xlsx:
@@ -3101,9 +3202,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/report/nousers:
     get:
+      operationId: report_nousers_get
       security:
         - bearerAuth: []
       tags:
@@ -3113,7 +3215,7 @@ paths:
       parameters:
         - in: query
           name: lang
-          description: Язык отчета (ru, en)
+          description: 'Язык отчета (ru, en)'
           required: false
           schema:
             type: string
@@ -3135,7 +3237,7 @@ paths:
             format: int64
             example: 1000
       responses:
-        200:
+        '200':
           description: Файл xlsx
           content:
             application/xlsx:
@@ -3147,9 +3249,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/report/usererrors:
     get:
+      operationId: report_userserror_get
       security:
         - bearerAuth: []
       tags:
@@ -3159,7 +3262,7 @@ paths:
       parameters:
         - in: query
           name: lang
-          description: Язык отчета (ru, en)
+          description: 'Язык отчета (ru, en)'
           required: false
           schema:
             type: string
@@ -3181,7 +3284,7 @@ paths:
             format: int64
             example: 1000
       responses:
-        200:
+        '200':
           description: Файл xlsx
           content:
             application/xlsx:
@@ -3193,9 +3296,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/system/log:
     get:
+      operationId: system_log_get
       security:
         - bearerAuth: []
       tags:
@@ -3212,7 +3316,7 @@ paths:
             format: int64
             example: 1
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3220,22 +3324,23 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: "#/components/schemas/Status"
+                    $ref: '#/components/schemas/Status'
                   data:
                     type: object
                     properties:
                       text:
                         description: Текест лога
                         type: string
-                        example: "текст последних ошибок и предупреждений системы"
+                        example: текст последних ошибок и предупреждений системы
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/features/refresh:
     get:
+      operationId: features_refresh_get
       security:
         - bearerAuth: []
       tags:
@@ -3260,92 +3365,91 @@ paths:
             format: int64
             example: 30
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /api/v1/migration:
     get:
+      operationId: migration_get      
       tags:
         - Служебные
       summary: Миграция БД
       description: Метод выполняет принудительную мигпацию БД
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessOK"
+                $ref: '#/components/schemas/SuccessOK'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /readinessCheck:
     get:
+      operationId: readiness_check_get
       tags:
         - Служебные
       summary: Активность терминала
       description: Метод выполняет проверку активности терминала
       responses:
-        200:
+        '200':
           description: OK
         default:
           description: unexpected error
-
 components:
   securitySchemes:
-    bearerAuth: # arbitrary name for the security scheme
+    bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+      bearerFormat: JWT
   schemas:
     Schedule:
       type: object
       properties:
         name:
           type: string
-          example: "1 смена"
+          example: 1 смена
         description:
           type: string
-          example: "Описание"
+          example: Описание
         data:
-          description: "Строка JSON со стуктурой времени доступа"
+          description: Строка JSON со стуктурой времени доступа
           type: string
-          example:
-            '{ "full_access": false, "weekdays": "1111100", "date_from": "2020-12-01",
-            "date_to": "2021-01-01", "time_from": "08:00", "time_to": "18:00" }'
+          example: '{ "full_access": false, "weekdays": "1111100", "date_from": "2020-12-01", "date_to": "2021-01-01", "time_from": "08:00", "time_to": "18:00" }'
     ScheduleOut:
       allOf:
-        - $ref: "#/components/schemas/Schedule"
+        - $ref: '#/components/schemas/Schedule'
         - type: object
           properties:
             id:
               type: integer
             created_at:
               type: string
-              example: "2020-03-17 12:45:56"
+              example: '2020-03-17 12:45:56'
     ZoneIn:
       type: object
       properties:
         parent_id:
           type: integer
-          example: null
+          example: 1
         name:
           type: string
-          example: "Zone 1"
+          example: Zone 1
         data:
-          $ref: "#/components/schemas/ZoneSetting"
+          $ref: '#/components/schemas/ZoneSetting'
     Zone:
       type: object
       properties:
@@ -3354,18 +3458,18 @@ components:
           example: 1
         parent_id:
           type: integer
-          example: null
+          example: 1
         name:
           type: string
-          example: "Zone 1"
+          example: Zone 1
         data:
-          $ref: "#/components/schemas/ZoneSetting"
+          $ref: '#/components/schemas/ZoneSetting'
         created_at:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
         updated_at:
           type: string
-          example: "2020-12-01 17:35:12"
+          example: '2020-12-01 17:35:12'
     ZoneSetting:
       type: object
       properties:
@@ -3383,14 +3487,14 @@ components:
           example: 1
         name:
           type: string
-          example: "Device 1"
+          example: Device 1
         zones_id:
           description: ID Зоны доступа
           type: integer
           example: 1
         ip_address:
           type: string
-          example: "192.168.1.100"
+          example: 192.168.1.100
           description: Адрес устройства
         purpose:
           description: Направление прохода
@@ -3398,7 +3502,7 @@ components:
           example: entrance
         sync_key:
           type: string
-          example: "adsfhg-65gdf645g-2da43fgff1-7jkl5g9d4d4k3"
+          example: adsfhg-65gdf645g-2da43fgff1-7jkl5g9d4d4k3
           description: Уникальный ключ синхронизации
         data:
           description: дополнительные данные для настройки устройства в формате JSON строки
@@ -3406,10 +3510,10 @@ components:
           example: '{ "temperature_enable": "off", "recognition_range": 2, "control_mode": "card","card_type": "TM","pass_timeout": 10,"system_mode": "default", "recognition_face": "0.7", "recognition_mask": "0.7", "mask_enabled": false, "show_fullname": true,"show_themp_info": false,"show_access": false}'
         created_at:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
         updated_at:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
     SetDevice:
       type: object
       properties:
@@ -3418,13 +3522,13 @@ components:
           format: int64
         name:
           type: string
-          example: "Device 1"
+          example: Device 1
         zones_id:
           type: integer
           example: 1
         ip_address:
           type: string
-          example: "192.168.1.100"
+          example: 192.168.1.100
         purpose:
           type: string
           example: entrance
@@ -3440,7 +3544,7 @@ components:
           example: 1
         guest_id:
           type: integer
-          example: null
+          example: 1
         request_type:
           type: integer
           description: Тип заявки
@@ -3451,7 +3555,7 @@ components:
         owner_name:
           type: string
           description: Имя владельца заявки
-          example: "Administrator"
+          example: Administrator
         name:
           type: string
           description: Имя гостя
@@ -3472,18 +3576,18 @@ components:
         department_name:
           type: string
           description: Название подразделения
-          example: "OVISION"
+          example: OVISION
         contacts:
-          $ref: "#/components/schemas/RequestContacts"
+          $ref: '#/components/schemas/RequestContacts'
         status:
           type: integer
-          description: Статус заявки 0-новая, 1-подтвержденная, 2-зарегистрированная, 3-отмененая
+          description: 'Статус заявки 0-новая, 1-подтвержденная, 2-зарегистрированная, 3-отмененая'
         due_from:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
         due_to:
           type: string
-          example: "2020-03-18 12:45:56"
+          example: '2020-03-18 12:45:56'
         link:
           type: string
           description: Ссылка на адрес лендинга закявки
@@ -3492,7 +3596,7 @@ components:
           description: Актуальность заявки
         created_at:
           type: string
-          example: "2020-03-16 12:45:56"
+          example: '2020-03-16 12:45:56'
     RequestContacts:
       type: object
       properties:
@@ -3517,16 +3621,16 @@ components:
           example: 1
         name:
           type: string
-          example: "My Company"
+          example: My Company
         description:
           type: string
-          example: "My Company description"
+          example: My Company description
         created_at:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
         updated_at:
           type: string
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
     CompanyIn:
       type: object
       properties:
@@ -3535,10 +3639,10 @@ components:
           example: 1
         name:
           type: string
-          example: "My Company"
+          example: My Company
         description:
           type: string
-          example: "My Company description"
+          example: My Company description
     Card:
       type: object
       properties:
@@ -3551,20 +3655,19 @@ components:
         name:
           type: string
           description: Наименование карты
-          example: "12341234"
+          example: '12341234'
         number:
           type: string
-          description: Номер карты (десятичном, HEX) форматах, взависимости от типа карты
-          example: "12341234"
+          description: 'Номер карты (десятичном, HEX) форматах, взависимости от типа карты'
+          example: '12341234'
         type_card:
           type: string
           description: Тип карты
-          example: "WDEC26"
+          example: WDEC26
         active:
           type: boolean
           description: Признак активности карты
           example: true
-
     AccessCards:
       type: object
       properties:
@@ -3574,32 +3677,31 @@ components:
         name:
           type: string
           description: Наименование карты
-          example: "12341234"
+          example: '12341234'
         number:
           type: string
-          description: Номер карты (десятичном, HEX) форматах, взависимости от типа карты
-          example: "12341234"
+          description: 'Номер карты (десятичном, HEX) форматах, взависимости от типа карты'
+          example: '12341234'
         type_card:
           type: string
           description: Тип карты
-          example: "WDEC26"
+          example: WDEC26
         active:
           type: boolean
           description: Признак активности карты
           example: true
-
     AccessItem:
       type: object
       properties:
         access:
           type: array
           items:
-            $ref: "#/components/schemas/ScheduleTime"
+            $ref: '#/components/schemas/ScheduleTime'
           description: Расписания доступа
         external_id:
           type: string
           description: Внешний ID группы доступа
-          example: ""
+          example: ''
         id:
           type: integer
           description: ID группы доступа
@@ -3628,7 +3730,7 @@ components:
       type: object
       properties:
         status:
-          $ref: "#/components/schemas/Status"
+          $ref: '#/components/schemas/Status'
         data:
           type: object
     Status:
@@ -3639,7 +3741,7 @@ components:
           example: 0
         message:
           type: string
-          example: "OK"
+          example: OK
     StatusErr:
       type: object
       properties:
@@ -3648,7 +3750,7 @@ components:
           example: 409
         message:
           type: string
-          example: "Error message"
+          example: Error message
     AuthUser:
       type: object
       properties:
@@ -3657,21 +3759,21 @@ components:
           example: 1
         first_name:
           type: string
-          example: "Админ"
+          example: Админ
         last_name:
           type: string
         middle_name:
           type: string
         type_user:
           type: string
-          example: "admin"
+          example: admin
         photo:
           type: string
         roles:
           type: array
           items:
             type: string
-            example: "add"
+            example: add
         zones:
           type: array
           items:
@@ -3685,10 +3787,10 @@ components:
           example: 1648040764
         refresh_token:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjpmYWxzZSwiZXhwIjoxOTU5MDc5ODY0LCJyZWZyZXNodXVpZCI6Ijc5Y"
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjpmYWxzZSwiZXhwIjoxOTU5MDc5ODY0LCJyZWZyZXNodXVpZCI6Ijc5Y
         token:
           type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........Q1CRk7YTR3_W2m6yTjnzljUhUDh8IYo-Jb1Gm7lf2Pk"
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9........Q1CRk7YTR3_W2m6yTjnzljUhUDh8IYo-Jb1Gm7lf2Pk
     Users:
       required:
         - first_name
@@ -3699,7 +3801,7 @@ components:
           example: 1
         external_id:
           type: string
-          example: ""
+          example: ''
         first_name:
           type: string
           example: Ivan
@@ -3711,7 +3813,7 @@ components:
           example: Ivanovich
         photo:
           type: string
-          example: "user_tyt5yt2uy5uy5525uy6576677.jpg"
+          example: user_tyt5yt2uy5uy5525uy6576677.jpg
         blacklisted:
           type: boolean
           description: Пользователь в черном списке
@@ -3723,37 +3825,9 @@ components:
         type_user:
           type: string
           example: employee
-    # ItemUser:
-    #   type: object
-    #   properties:
-    #     blacklisted:
-    #       type: boolean
-    #       description: Пользователь в черном списке
-    #       example: false
-    #     blocked:
-    #       type: boolean
-    #       description: Блокировка пользователя
-    #       example: false
-    #     created_at:
-    #       type: string
-    #       description: Дата и время добавления записи
-    #       example: 2020-03-17 12:45:56
-    #     id:
-    #       type: integer
-    #       example: 1
-    #     photo:
-    #       type: string
-    #       description: Имя файла фото пользователя
-    #       example: user_tyt5yt2uy5uy5525uy6576677.jpg
-    #     schema:
-    #       $ref: '#/components/schemas/UserBase'
-    #     updated_at:
-    #       type: string
-    #       description: Дата и время изменения записи
-    #       example: 2020-03-17 12:45:56
     GuardIn:
       allOf:
-        - $ref: "#/components/schemas/User"
+        - $ref: '#/components/schemas/User'
         - type: object
           properties:
             username:
@@ -3761,7 +3835,7 @@ components:
               example: admin
             password:
               type: string
-              example: "passw123456"
+              example: passw123456
             zones:
               type: array
               description: Список ID зон
@@ -3769,48 +3843,44 @@ components:
                 type: integer
                 example: 1
             type_user:
-              example: "guard"
+              example: guard
             roles:
               type: array
               description: Список ролей
               items:
                 type: string
-                example: "useradd"
+                example: useradd
             photo_encrypted:
               type: string
-              description:
-                Если нет photo_url используется строка кодированная BASE64
-                содержащая код изображения
+              description: Если нет photo_url используется строка кодированная BASE64 содержащая код изображения
               example: <base64>
     ItemUserIn:
       allOf:
-        - $ref: "#/components/schemas/UserBase"
+        - $ref: '#/components/schemas/UserBase'
         - type: object
           properties:
             access_groups:
               type: array
               description: Список подключенных групп доступа (не обязательно)
               items:
-                $ref: "#/components/schemas/AccessItem"
+                $ref: '#/components/schemas/AccessItem'
             cards:
               type: array
               description: Список карт доступа
               items:
-                $ref: "#/components/schemas/AccessCards"
+                $ref: '#/components/schemas/AccessCards'
             data:
               type: string
               description: Доболнительные поля с формате JSON строки
-              example: "{}"
+              example: '{}'
             photo_encrypted:
               type: string
-              description:
-                Если нет photo_url используется строка кодированная BASE64
-                содержащая код изображения
+              description: Если нет photo_url используется строка кодированная BASE64 содержащая код изображения
               example: <base64>
             photo_url:
               type: string
               description: URL фото пользователя
-              example: ""
+              example: ''
             departments_id:
               type: integer
             subdivisions:
@@ -3824,7 +3894,7 @@ components:
               description: Отключение проверки фото
     ItemUserOut:
       allOf:
-        - $ref: "#/components/schemas/UserBase"
+        - $ref: '#/components/schemas/UserBase'
         - type: object
           properties:
             data:
@@ -3851,31 +3921,29 @@ components:
               example: user_tyt5yt2uy5uy5525uy6576677.jpg
             photo_encrypted:
               type: string
-              description:
-                Если нет photo_url используется строка кодированная BASE64
-                содержащая код изображения
+              description: Если нет photo_url используется строка кодированная BASE64 содержащая код изображения
               example: <BASE64>
             access_groups:
               type: array
               description: Список подключенных групп доступа
               items:
-                $ref: "#/components/schemas/AccessItem"
+                $ref: '#/components/schemas/AccessItem'
             cards:
               type: array
               description: Список карт пользовыателя
               items:
-                $ref: "#/components/schemas/AccessCards"
+                $ref: '#/components/schemas/AccessCards'
             created_at:
               type: string
               description: Дата и время добавления записи
-              example: 2020-03-17 12:45:56
+              example: '2020-03-17 12:45:56'
             updated_at:
               type: string
               description: Дата и время изменения записи
-              example: "2020-03-17 12:45:56"
+              example: '2020-03-17 12:45:56'
     UserOut:
       allOf:
-        - $ref: "#/components/schemas/UserBase"
+        - $ref: '#/components/schemas/UserBase'
         - type: object
           properties:
             id:
@@ -3884,7 +3952,7 @@ components:
             data:
               type: string
               description: Доболнительные поля с формате JSON строки
-              example: "{}"
+              example: '{}'
             deleted:
               type: boolean
               description: Пользователь помечан на удаление
@@ -3896,37 +3964,37 @@ components:
             created_at:
               type: string
               description: Дата и время добавления записи
-              example: 2020-03-17 12:45:56
+              example: '2020-03-17 12:45:56'
             updated_at:
               type: string
               description: Дата и время изменения записи
-              example: "2020-03-17 12:45:56"
+              example: '2020-03-17 12:45:56'
     OutVisits:
       type: object
       properties:
         visits:
           type: array
           items:
-            $ref: "#/components/schemas/OutAllVisit"
+            $ref: '#/components/schemas/OutAllVisit'
         days:
           type: array
           items:
-            $ref: "#/components/schemas/OutDaysVisit"
+            $ref: '#/components/schemas/OutDaysVisit'
         total:
           type: string
-          example: "20:34"
+          example: '20:34'
     OutAllVisit:
       type: object
       properties:
         day:
           type: string
-          example: "2021-01-13"
+          example: '2021-01-13'
         purpose:
           type: string
-          example: "exit"
+          example: exit
         time_purpose:
           type: string
-          example: "16:08"
+          example: '16:08'
         data:
           type: string
           example: '{"zone": "terminal", "device_name": "guard-1", "temperature": 0}'
@@ -3935,19 +4003,19 @@ components:
       properties:
         day:
           type: string
-          example: "2021-01-13"
+          example: '2021-01-13'
         first_entering:
           type: string
-          example: "19:13"
+          example: '19:13'
         last_exit:
           type: string
-          example: "23:59"
+          example: '23:59'
         work_time:
           type: string
-          example: "04:46"
+          example: '04:46'
         out_work_time:
           type: string
-          example: "00:00"
+          example: '00:00'
     Event:
       type: object
       properties:
@@ -3958,65 +4026,78 @@ components:
           type: integer
           example: 1
         external_id:
-          description: id во внешней системе, если запись получена путем интеграции
+          description: 'id во внешней системе, если запись получена путем интеграции'
           type: string
-          example: "234"  
+          example: '234'
         purpose:
           type: string
           example: exit
         event:
-          description: дополнительные данные по событиям в формате JSON строки
-          $ref: "#/components/schemas/DataEvent"
+          $ref: '#/components/schemas/DataEvent'
         created_at:
           type: string
           description: Дата и время изменения записи
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
+        last:
+          type: boolean
+          default: false
     DataEvent:
       type: object
+      description: Даннные по посещению
       properties:
         temperature:
           type: string
-          example: "0.0"
+          example: '0.0'
         temperature_status:
           type: string
-          example: "norm"
+          example: norm
         type:
           type: string
           example: pass
-          description: "тип события pass - проход, before - распознан, alarm - не распознан, error - ошибка"
+          description: 'тип события pass - проход, before - распознан, alarm - не распознан, error - ошибка'
         identity_types:
           type: string
-          description: "тип идентификации face - лицо, card - карта доступа, qr QR-код"
-          example: "face"
+          description: 'тип идентификации face - лицо, card - карта доступа, qr QR-код'
+          example: face
         identity_value:
           type: string
-          description: "значение идентификации (для card и qr)"
-          example: ""
+          description: значение идентификации (для card и qr)
         code:
           type: string
-          description: "код события (обычно число, но возвращается в виде строки)"
-          example: "35"
+          description: 'код события (обычно число, но возвращается в виде строки)'
+          example: '35'
         message:
           type: string
-          example: "user_passed"
+          example: user_passed
         zone_source:
           type: string
-          description: "Имя зоны источник"
-          example: ""
+          description: Имя зоны источник
         zone:
           type: string
-          description: "имя зоны локации"
-          example: "Main entrance1"
+          description: имя зоны локации (откуда и куда совершается проход)
+          example: Main entrance1
         zone_id:
           type: string
-          description: "ID зоны локации"
-          example: "1"
+          description: ID зоны локации
+          example: '1'
         device_name:
           type: string
-          example: "device 1"
+          example: device 1
         device_uid:
           type: string
-          example: "bc0bbc03-276b-4fd7-8d68-a495922060df"
+          example: bc0bbc03-276b-4fd7-8d68-a495922060df
+        reader_name:
+          type: string
+          description: array encoded in string
+        identifiers:
+          $ref: '#/components/schemas/Identifiers'
+        wear_mask:
+          type: string
+          description: The same as in filter request
+        channel:
+          type: integer
+          format: int64
+      title: DataEvent
     VisitOut:
       type: object
       properties:
@@ -4031,10 +4112,10 @@ components:
           example: user_tyt5yt2uy5uy5525uy6576677.jpg
         full_name:
           type: string
-          example: "Ivanov Ivan"
+          example: Ivanov Ivan
         type_user:
           type: string
-          example: "employee"
+          example: employee
         purpose:
           type: string
           example: exit
@@ -4050,13 +4131,19 @@ components:
           type: boolean
         organization:
           type: array
-          description: Список подключенных групп доступа
           items:
-            $ref: "#/components/schemas/AccessItem"
+            $ref: '#/components/schemas/SShort'
         created_at:
           type: string
-          description: Дата и время создания записи
-          example: "2020-03-17 12:45:56"
+          format: date-time
+        device_uid:
+          type: string
+        uid:
+          type: string
+        event:
+          $ref: '#/components/schemas/DataEvent'
+        department:
+          type: string
     VisitLog:
       type: object
       properties:
@@ -4071,10 +4158,10 @@ components:
           example: user_tyt5yt2uy5uy5525uy6576677.jpg
         full_name:
           type: string
-          example: "Ivanov Ivan"
+          example: Ivanov Ivan
         type_user:
           type: string
-          example: "employee"
+          example: employee
         purpose:
           type: string
           example: exit
@@ -4089,23 +4176,23 @@ components:
           type: array
           description: Список подключенных групп доступа
           items:
-            $ref: "#/components/schemas/AccessItem"
+            $ref: '#/components/schemas/AccessItem'
         created_at:
           type: string
           description: Дата и время создания записи
-          example: "2020-03-17 12:45:56"
+          example: '2020-03-17 12:45:56'
     Settings:
       type: object
       properties:
         temperature_range:
-          description: "Диаапвзоны температуры"
+          description: Диапaзоны температуры
           type: string
-          example: "34.0:37.2"
+          example: '34.0:37.2'
         temperature_enabled:
-          description: "Использовать температуру"
+          description: Использовать температуру
           type: boolean
         temperature_rise:
-          description: "Скрывать показания температуры"
+          description: Скрывать показания температуры
           type: boolean
     Pagination:
       type: object
@@ -4127,10 +4214,10 @@ components:
           example: 1
         parent_id:
           type: integer
-          example: null
+          example: 1
         name:
           type: string
-          example: "Subdivision"
+          example: Subdivision
         children:
           type: array
           items:
@@ -4142,37 +4229,37 @@ components:
           type: boolean
         weekdays:
           type: string
-          example: "1111100"
+          example: '1111100'
         date_from:
           type: string
-          example: "2021-01-01"
+          example: '2021-01-01'
         date_to:
           type: string
-          example: "2022-01-01"
+          example: '2022-01-01'
         time_from:
           type: string
-          example: "08:00"
+          example: '08:00'
         time_to:
           type: string
-          example: "18:00"
+          example: '18:00'
     DepartmentIn:
       type: object
       properties:
         external_id:
           type: string
-          example: ""
+          example: ''
         name:
           type: string
-          example: "Department"
+          example: Department
         parent_id:
           type: integer
-          example: null
+          example: 1
         company_id:
           type: integer
           example: 1
         schedules_id:
           type: integer
-          example: null
+          example: 1
     Department:
       type: object
       properties:
@@ -4181,45 +4268,44 @@ components:
           example: 1
         external_id:
           type: string
-          example: ""
+          example: ''
         name:
           type: string
-          example: "Department"
+          example: Department
         parent_id:
           type: integer
-          example: null
+          example: 1
         company_id:
           type: integer
           example: 1
         schedules_id:
           type: integer
-          example: null
+          example: 1
         created_at:
           type: string
-          example: "2020-12-01 17:35:12"
+          example: '2020-12-01 17:35:12'
         updated_at:
           type: string
-          example: "2020-12-01 17:35:12"
-
+          example: '2020-12-01 17:35:12'
     SubdivisionAdd:
       type: object
       properties:
         external_id:
           type: string
-          example: ""
+          example: ''
         name:
           type: string
-          example: "Subdivision"
+          example: Subdivision
         parent_id:
           type: integer
-          example: null
+          example: 1
         company_id:
           type: integer
           example: 1
         access:
           type: array
           items:
-            $ref: "#/components/schemas/ScheduleTime"
+            $ref: '#/components/schemas/ScheduleTime'
         zones_id:
           type: array
           items:
@@ -4235,21 +4321,20 @@ components:
           example: 1
         external_id:
           type: string
-          example: ""
         company_id:
           type: integer
-          example: null
+          example: 1
         name:
           type: string
-          example: "Subdivision"
+          example: Subdivision
         parent_id:
-          description: "Значение по умолчанию NULL (не изменять), без родительской группы -1, или ID родительской группы" 
+          description: 'Значение по умолчанию NULL (не изменять), без родительской группы -1, или ID родительской группы'
           type: integer
-          example: null
+          example: 1
         access:
           type: array
           items:
-            $ref: "#/components/schemas/ScheduleTime"
+            $ref: '#/components/schemas/ScheduleTime'
         zones_id:
           type: array
           items:
@@ -4257,10 +4342,10 @@ components:
             example: 1
         created_at:
           type: string
-          example: "2020-12-01 17:35:12"
+          example: '2020-12-01 17:35:12'
         updated_at:
           type: string
-          example: "2020-12-01 17:35:12"
+          example: '2020-12-01 17:35:12'
     Success:
       required:
         - message
@@ -4269,7 +4354,7 @@ components:
       properties:
         message:
           type: string
-          example: ""
+          example: ''
         success:
           type: boolean
           example: true
@@ -4293,15 +4378,14 @@ components:
         phone:
           type: string
           description: Номер сотового телефона
-          example: "+79223410000"
+          example: '+79223410000'
         type_user:
           type: string
-          description: Тип пользователя (admin, guard, employee, guest)
+          description: 'Тип пользователя (admin, guard, employee, guest)'
           example: employee
-
     UserBase:
       allOf:
-        - $ref: "#/components/schemas/User"
+        - $ref: '#/components/schemas/User'
         - type: object
           properties:
             blacklisted:
@@ -4314,5 +4398,33 @@ components:
               example: false
             external_id:
               type: string
-              description: ID записи интегрируемого сервиса (Облако, СКУД)
-              example: ""
+              description: 'ID записи интегрируемого сервиса (Облако, СКУД)'
+              example: ''
+    Identifiers:
+      title: Identifiers
+      x-stoplight:
+        id: ozluqx1exgr17
+      type: object
+      description: Points out what ID were used (many or singular) during the visit event
+      properties:
+        face_id:
+          type: string
+          description: |
+            id лица, по которому был совершен проход
+        card_id:
+          type: string
+          description: id карты
+        qr_id:
+          type: string
+          description: id QR кода
+    SShort:
+      title: SShort
+      x-stoplight:
+        id: jmo14pt9fc7kx
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
