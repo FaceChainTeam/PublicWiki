@@ -1314,7 +1314,7 @@ paths:
           description: идентификатор интеграции
       tags:
         - Управление пользователями
-  '/api/user/restore/{id} - copy':
+  '/api/user/restore/{id}':
     parameters:
       - schema:
           type: string
