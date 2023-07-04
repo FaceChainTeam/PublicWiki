@@ -1024,6 +1024,13 @@ paths:
             type: integer
             format: int64
             example: 0
+        - schema:
+            type: integer
+            default: 0
+          in: query
+          name: deleted
+          description: Если = 1 - возвращать и идентификаторы мягко удаленных пользователей
+          allowEmptyValue: true
       responses:
         '200':
           description: Group list response!
@@ -1260,6 +1267,194 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       operationId: events_list
+  '/api/user/delete/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: id пользователя в Опорт
+    put:
+      summary: ''
+      operationId: put-api-user-delete-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                Success:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Failed:
+                  value:
+                    status:
+                      code: 400
+                      message: No user ID provided
+                    data: {}
+      description: 'Удаляет пользователя мягко, по ID СКУДа Опорт'
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: iid
+          description: идентификатор интеграции
+      tags:
+        - Управление пользователями
+  '/api/user/restore/{id} - copy':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: id пользователя в Опорт
+    put:
+      summary: ''
+      operationId: put-api-user-restore-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                Success:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Failed:
+                  value:
+                    status:
+                      code: 400
+                      message: No user ID provided
+                    data: {}
+      description: 'Восстанавливает мягко удаленного пользователя, по ID СКУДа Опорт'
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: iid
+          description: идентификатор интеграции
+      tags:
+        - Управление пользователями
+  '/api/user/ext/delete/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: id пользователя в стороннем СКУД
+    put:
+      summary: ''
+      operationId: put-api-user-delete-ext-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                Success:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Failed:
+                  value:
+                    status:
+                      code: 400
+                      message: No user ID provided
+                    data: {}
+      description: 'Удаляет пользователя мягко, по ID стороннего СКУДа '
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: iid
+          description: идентификатор интеграции
+      tags:
+        - Управление пользователями
+  '/api/user/ext/restore/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: id пользователя в стороннем СКУД
+    put:
+      summary: ''
+      operationId: put-api-user-restore-ext-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                Success:
+                  value:
+                    status:
+                      code: 0
+                      message: OK
+                    data: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Failed:
+                  value:
+                    status:
+                      code: 400
+                      message: No user ID provided
+                    data: {}
+      description: 'Восстанавливает мягко удаленного пользователя, по ID стороннего СКУДа '
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: iid
+          description: идентификатор интеграции
+      tags:
+        - Управление пользователями
 components:
   securitySchemes:
     Token:
@@ -1323,8 +1518,7 @@ components:
           example: 1
     Error:
       required:
-        - message
-        - success
+        - status
       type: object
       properties:
         status:
@@ -1496,6 +1690,13 @@ components:
         last_updated:
           type: string
           example: '2020-12-01 17:23:04'
+          format: date-time
+          readOnly: true
+        deleted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      description: ''
     SubdivisionIds:
       type: object
       properties:
@@ -1626,6 +1827,12 @@ components:
           $ref: '#/components/schemas/Status'
         data:
           type: object
+      x-examples:
+        Example 1:
+          status:
+            code: 0
+            message: OK
+          data: {}
     Problem:
       type: object
       properties:
