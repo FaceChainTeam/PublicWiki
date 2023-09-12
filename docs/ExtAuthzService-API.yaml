@@ -1,0 +1,84 @@
+openapi: 3.1.0
+info:
+  title: OGATE External Authz Service (broker) API
+  version: '1.0'
+  summary: Service intended for integration of OGATE pipelene with "alkoramka" device
+  description: 'Implementing standard `External factoring service API`, used by OGATE Device for external authorization'
+  contact:
+    url: ovision.ru
+    email: info@ovision.ru
+    name: OVISION LTD
+servers:
+  - url: 'http://localhost:3000'
+    description: ExternalAuthBroker
+paths:
+  /authz:
+    post:
+      summary: External authz services only command
+      tags:
+        - authz
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: object
+                    required:
+                      - code
+                      - message
+                    properties:
+                      code:
+                        type: integer
+                        description: 200 if OK
+                      message:
+                        type: string
+                        description: Any error or success message text 
+                  data:
+                    type: string
+                    description: 'Free form text, might be logged by device'
+                  meta:
+                    type: string
+                required:
+                  - status
+              examples:
+                Example 1:
+                  value:
+                    status:
+                      code: 200
+                      message: Доступ разрешен
+                    data: 'Авторизация прошла за 10ms, адрес сервера авторизации: Аляска'
+      operationId: get-pass
+      description: External authorization should be processed in this request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id:
+                  type: integer
+                  description: |
+                    idempotence id
+                user_id:
+                  type: string
+                  description: User's ID from auth step
+                timeout_sec:
+                  type: integer
+                  description: For how long operation should last
+                device_id:
+                  type: string
+                  description: ID of requesting device
+                device_ip:
+                  type: string
+                  description: IP address of requesting device
+        description: Device will send that information
+    parameters: []
+components:
+  schemas: {}
+  responses: {}
+tags:
+  - name: authz
