@@ -76,12 +76,12 @@ paths:
                 $ref: '#/components/schemas/Error'
   /auth/user:
     get:
-      operationId: auth_user_get      
+      operationId: auth_user_get
       security:
         - bearerAuth: []
       tags:
         - Авторизация
-      description: get authentificated user's info  
+      description: get authentificated user's info
       summary: Учетная запись
       responses:
         '200':
@@ -103,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /auth/refresh:
     get:
-      operationId: auth_refresh_get      
+      operationId: auth_refresh_get
       tags:
         - Авторизация
       summary: Обновление токена авторизации
@@ -200,7 +200,7 @@ paths:
           content: {}
   /api/v1/user/add:
     post:
-      operationId: user_add_post      
+      operationId: user_add_post
       security:
         - bearerAuth: []
       tags:
@@ -210,7 +210,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ItemUserIn'
+              $ref: '#/components/schemas/ItemUserAddIn'
         required: false
       responses:
         '200':
@@ -238,7 +238,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/user/{id}':
     get:
-      operationId: user_byid_get      
+      operationId: user_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -454,7 +454,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/blacklisted:
     put:
-      operationId: user_blacklisted_put      
+      operationId: user_blacklisted_put
       security:
         - bearerAuth: []
       tags:
@@ -489,7 +489,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /user/unblacklisted:
     put:
-      operationId: user_unblacklisted_put      
+      operationId: user_unblacklisted_put
       security:
         - bearerAuth: []
       tags:
@@ -524,7 +524,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/restore:
     put:
-      operationId: user_restore_put      
+      operationId: user_restore_put
       security:
         - bearerAuth: []
       tags:
@@ -559,7 +559,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/clear:
     put:
-      operationId: user_clear_put      
+      operationId: user_clear_put
       security:
         - bearerAuth: []
       tags:
@@ -594,7 +594,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/users/trash:
     delete:
-      operationId: users_trash_delete      
+      operationId: users_trash_delete
       security:
         - bearerAuth: []
       tags:
@@ -616,7 +616,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/users/all:
     delete:
-      operationId: users_all_delete      
+      operationId: users_all_delete
       security:
         - bearerAuth: []
       tags:
@@ -638,7 +638,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/import:
     post:
-      operationId: user_import_post      
+      operationId: user_import_post
       security:
         - bearerAuth: []
       tags:
@@ -671,7 +671,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/export:
     get:
-      operationId: user_export_get      
+      operationId: user_export_get
       security:
         - bearerAuth: []
       tags:
@@ -702,7 +702,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/user/import/photo:
     post:
-      operationId: user_import_photo_post      
+      operationId: user_import_photo_post
       security:
         - bearerAuth: []
       tags:
@@ -735,7 +735,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/user/{id}/visits':
     get:
-      operationId: user_byid_visits_get      
+      operationId: user_byid_visits_get
       security:
         - bearerAuth: []
       tags:
@@ -776,7 +776,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/users/multi/sdv:
     post:
-      operationId: user_multi_sdv_post      
+      operationId: user_multi_sdv_post
       security:
         - bearerAuth: []
       tags:
@@ -821,7 +821,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/company:
     get:
-      operationId: company_get      
+      operationId: company_get
       security:
         - bearerAuth: []
       tags:
@@ -850,12 +850,12 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/company/add:
     post:
-      operationId: compoany_add_post      
+      operationId: compoany_add_post
       security:
         - bearerAuth: []
       tags:
         - Компании
-      description: 'Добавление компании'
+      description: Добавление компании
       summary: Добавить компанию
       requestBody:
         content:
@@ -883,7 +883,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/company/{id}':
     get:
-      operationId: company_byid_get      
+      operationId: company_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -951,7 +951,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
-      operationId: company_by_id_delete      
+      operationId: company_by_id_delete
       security:
         - bearerAuth: []
       tags:
@@ -980,7 +980,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/guards:
     get:
-      operationId: guards_get      
+      operationId: guards_get
       security:
         - bearerAuth: []
       tags:
@@ -1031,7 +1031,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/guard/add:
     post:
-      operationId: guard_add_post      
+      operationId: guard_add_post
       security:
         - bearerAuth: []
       tags:
@@ -1063,7 +1063,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/guard/{id}':
     get:
-      operationId: guard_byid_get      
+      operationId: guard_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -1109,7 +1109,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
-      operationId: guard_byid_post      
+      operationId: guard_byid_post
       security:
         - bearerAuth: []
       tags:
@@ -1155,7 +1155,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
-      operationId: guard_byuid_delete      
+      operationId: guard_byuid_delete
       security:
         - bearerAuth: []
       tags:
@@ -1257,7 +1257,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/visitors:
     get:
-      operationId: visitors_get      
+      operationId: visitors_get
       security:
         - bearerAuth: []
       tags:
@@ -1394,7 +1394,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/alarmvisit/{id}':
     delete:
-      operationId: alarmvisits_byid_delete      
+      operationId: alarmvisits_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -1553,7 +1553,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/advanced/log:
     get:
-      operationId: advanced_log_get      
+      operationId: advanced_log_get
       security:
         - bearerAuth: []
       tags:
@@ -1615,7 +1615,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/getEvents:
     get:
-      operationId: get_events_get      
+      operationId: get_events_get
       security:
         - bearerAuth: []
       tags:
@@ -2140,7 +2140,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
-      operationId: department_byid_delete      
+      operationId: department_byid_delete
       security:
         - bearerAuth: []
       tags:
@@ -2170,7 +2170,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/subdivisions:
     get:
-      operationId: subdivisions_get      
+      operationId: subdivisions_get
       security:
         - bearerAuth: []
       tags:
@@ -2199,7 +2199,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/subdivisions/tree:
     get:
-      operationId: subdivisions_tree_get      
+      operationId: subdivisions_tree_get
       security:
         - bearerAuth: []
       tags:
@@ -2411,7 +2411,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/zone/add:
     post:
-      operationId: zone_add_post      
+      operationId: zone_add_post
       security:
         - bearerAuth: []
       tags:
@@ -2443,7 +2443,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/zone/{id}':
     get:
-      operationId: zone_byid_get      
+      operationId: zone_byid_get
       security:
         - bearerAuth: []
       tags:
@@ -2611,7 +2611,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/card/{id}':
     get:
-      operationId: card_id_get      
+      operationId: card_id_get
       security:
         - bearerAuth: []
       tags:
@@ -2710,7 +2710,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/schedules:
     get:
-      operationId: schedules_get      
+      operationId: schedules_get
       security:
         - bearerAuth: []
       tags:
@@ -2772,7 +2772,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   '/api/v1/schedule/{id}':
     get:
-      operationId: schedule_id_get      
+      operationId: schedule_id_get
       security:
         - bearerAuth: []
       tags:
@@ -3379,7 +3379,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /api/v1/migration:
     get:
-      operationId: migration_get      
+      operationId: migration_get
       tags:
         - Служебные
       summary: Миграция БД
@@ -3892,6 +3892,15 @@ components:
             no_check_photo:
               type: boolean
               description: Отключение проверки фото
+    ItemUserAddIn:
+      allOf:
+        - $ref: '#/components/schemas/ItemUserIn'
+        - type: object
+          properties:
+            uid:
+              type: string
+              format: uuid
+              description: User ID as UUID (generated automatically if not provided)
     ItemUserOut:
       allOf:
         - $ref: '#/components/schemas/UserBase'
@@ -4400,6 +4409,8 @@ components:
               type: string
               description: 'ID записи интегрируемого сервиса (Облако, СКУД)'
               example: ''
+          required:
+            - uid
     Identifiers:
       title: Identifiers
       x-stoplight:
