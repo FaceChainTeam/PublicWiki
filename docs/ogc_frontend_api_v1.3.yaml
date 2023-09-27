@@ -1971,7 +1971,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessOK'
+                type: object
+                properties:
+                  status: 
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    $ref: '#/components/schemas/DeviceStatus'
+
         default:
           description: unexpected error
           content:
@@ -4439,3 +4445,27 @@ components:
           format: int64
         name:
           type: string
+    DeviceStatus:
+      properties:
+        id:
+          type: integer
+          example: 10
+        status:
+          type: boolean
+        pipeline_time:
+          type: integer
+        person_num:
+          type: integer
+        gate_command:
+          description: "open,close,default"
+          type: array
+          items:
+            type: string
+            example: "default"
+        system_state:
+          type: string
+          description: "on, off"
+          example: "on"
+        send:
+          type: boolean
+          description: "Флаг синхронизации устройства"
