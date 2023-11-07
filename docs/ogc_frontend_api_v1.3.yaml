@@ -636,6 +636,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              description: массив из названий типов (версий) векторов
+              items:
+                type: string
+  /api/v1/users/vectorless:
+    get:
+      operationId: get-api-v1-users-vectorless
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserWithoutVector'
+      security:
+        - bearerAuth: []
+      tags:
+        - Пользователи без векторов с разбивкой по моделям
+      summary: Получить разбивку всех пользователей у которых нет векторов для заданной модели
+      description: 'Может быть вызвано только оператором, но не аккаунт менеджером, если массив версий векторов не передан - возвратит по всем типам векторов, присутствующих в системе'
   /api/v1/user/import:
     post:
       operationId: user_import_post
@@ -1754,6 +1785,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /api/v1/devices/vectorversions:
+    get:
+      operationId: devices_get_vector_versions
+      security:
+        - bearerAuth: []
+      tags:
+        - Типы векторов
+      summary: Все присутствующие в системе типы векторов
+      description: Метод выводит список типов (версий) векторов
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    description: Массив названий типов векторов
+                    items:
+                      type: string
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    parameters: []
   /api/v1/device/add:
     post:
       operationId: device_add_post
@@ -1973,11 +2036,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: 
+                  status:
                     $ref: '#/components/schemas/Status'
                   data:
                     $ref: '#/components/schemas/DeviceStatus'
-
         default:
           description: unexpected error
           content:
@@ -4457,15 +4519,35 @@ components:
         person_num:
           type: integer
         gate_command:
-          description: "open,close,default"
+          description: 'open,close,default'
           type: array
           items:
             type: string
-            example: "default"
+            example: default
         system_state:
           type: string
-          description: "on, off"
-          example: "on"
+          description: 'on, off'
+          example: 'on'
         send:
           type: boolean
-          description: "Флаг синхронизации устройства"
+          description: Флаг синхронизации устройства
+    UserWithoutVector:
+      title: UserWithoutVector
+      x-stoplight:
+        id: hioidn2xrervb
+      type: object
+      description: 'User identificators with absent vector types '
+      properties:
+        id:
+          type: integer
+          description: ogate control's id
+        uid:
+          type: string
+          description: user's UUID
+        version:
+          type: string
+          description: vector version (type)
+      required:
+        - id
+        - uid
+        - version
